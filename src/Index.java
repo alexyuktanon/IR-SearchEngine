@@ -44,6 +44,14 @@ public class Index {
 			positionTuples.add(t);
 		}
 		
+		public List<Tuple> getTfidfTuples() {
+			return tfidfTuples;
+		}
+		
+		public List<Tuple> getPositionTuples() {
+			return positionTuples;
+		}
+		
 		@Override
 		public String toString(){
 			return "TFIDF: " + listToString(tfidfTuples) + "\n" + "position index: " + listToString(positionTuples) + "\n";
