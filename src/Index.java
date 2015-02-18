@@ -1,7 +1,11 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.collections4.MultiMap;
+import org.apache.commons.collections4.map.MultiValueMap;
 
 
 public class Index {
@@ -29,30 +33,30 @@ public class Index {
 	
 	private class IndexComponents {
 		private List<Tuple> tfidfTuples;
-		private List<Tuple> positionTuples;
+		private MultiMap<String, Integer> positionTuples;
 		
 //		private Map<String, <double, List<double> >
 		
 		public IndexComponents() {
 			tfidfTuples = new ArrayList<Index.Tuple>();
-			positionTuples = new ArrayList<Index.Tuple>();
+			positionTuples = new MultiValueMap<String, Integer>();
 		}
 		
-		public void putPositionTuple(Tuple t) {
-			positionTuples.add(t);
+		public void putPositionTuple(String word, int position) {
+			positionTuples.put(word, position);
 		}
 		
 		public List<Tuple> getTfidfTuples() {
 			return tfidfTuples;
 		}
 		
-		public List<Tuple> getPositionTuples() {
+		public MultiMap<String, Integer> getPositionTuples() {
 			return positionTuples;
 		}
 		
 		@Override
 		public String toString(){
-			return "TFIDF: " + listToString(tfidfTuples) + "\n" + "position index: " + listToString(positionTuples) + "\n";
+			return "TFIDF: " + listToString(tfidfTuples) + "\n" + "position index: " + positionTuples.toString() + "\n";
 		}
 		
 		private String listToString(List<Tuple> l) {
@@ -69,15 +73,18 @@ public class Index {
 	private Map<String, IndexComponents> index = new HashMap<String, IndexComponents>(); // map word to indexes
 	
 	public void putPositionIndex(String word, String docId, int position) {
+		IndexComponents comp;
 		if(!index.containsKey(word)) {
-			IndexComponents comp = new IndexComponents();
-			comp.putPositionTuple(new Tuple(docId, (double) position));
-			index.put(word, comp);
+			comp = new IndexComponents();
 		} else {
-			IndexComponents comp = index.get(word);
-			comp.putPositionTuple(new Tuple(docId, (double) position));
-			index.put(word, comp);
+			comp = index.get(word);
 		}
+		comp.putPositionTuple(docId, position);
+		index.put(word, comp);
+	}
+	
+	public MultiMap<String, Integer> getPositionMap(String word) {
+		return index.get(word).getPositionTuples();
 	}
 	
 	@Override
@@ -93,8 +100,15 @@ public class Index {
 	public static void main(String args[]) {
 		Index index = new Index();
 		index.putPositionIndex("word", "d1", 1);
+		index.putPositionIndex("word", "d1", 5);
 		index.putPositionIndex("word", "d2", 1);
 		index.putPositionIndex("w2", "d1", 2);
 		System.out.println(index.toString());
+		MultiMap<String, Integer> positionMap = index.getPositionMap("word");
+		for(Object key : positionMap.keySet()) {
+			System.out.println(key + " : " + positionMap.get(key));
+			List<Integer> l = (List<Integer>) positionMap.get(key);
+			for(Integer i : l) System.out.println(i);
+		}
 	}
 }
