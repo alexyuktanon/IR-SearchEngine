@@ -32,23 +32,29 @@ public class Index {
 	}
 	
 	private class IndexComponents {
-		private List<Tuple> tfidfTuples;
+//		private List<Tuple> tfidfTuples;
+		private Map<String, Double> tfidfTuples;
 		private MultiMap<String, Integer> positionTuples;
 		
 //		private Map<String, <double, List<double> >
 		
 		public IndexComponents() {
-			tfidfTuples = new ArrayList<Index.Tuple>();
+//			tfidfTuples = new ArrayList<Index.Tuple>();
+			tfidfTuples = new HashMap<String, Double>();
 			positionTuples = new MultiValueMap<String, Integer>();
+		}
+		
+		public void putTfidfTuple(String word, double frequency) {
+			tfidfTuples.put(word, frequency);
 		}
 		
 		public void putPositionTuple(String word, int position) {
 			positionTuples.put(word, position);
 		}
 		
-		public List<Tuple> getTfidfTuples() {
-			return tfidfTuples;
-		}
+//		public List<Tuple> getTfidfTuples() {
+//			return tfidfTuples;
+//		}
 		
 		public MultiMap<String, Integer> getPositionTuples() {
 			return positionTuples;
@@ -56,7 +62,7 @@ public class Index {
 		
 		@Override
 		public String toString(){
-			return "TFIDF: " + listToString(tfidfTuples) + "\n" + "position index: " + positionTuples.toString() + "\n";
+			return "TFIDF: " + tfidfTuples.toString() + "\n" + "position index: " + positionTuples.toString() + "\n";
 		}
 		
 		private String listToString(List<Tuple> l) {
@@ -71,6 +77,17 @@ public class Index {
 	}
 
 	private Map<String, IndexComponents> index = new HashMap<String, IndexComponents>(); // map word to indexes
+	
+	public void putTfidfIndex(String word, String docId, double frequency) {
+		IndexComponents comp;
+		if(!index.containsKey(word)) {
+			comp = new IndexComponents();
+		} else {
+			comp = index.get(word);
+		}
+		comp.putTfidfTuple(docId, frequency);
+		index.put(word, comp);
+	}
 	
 	public void putPositionIndex(String word, String docId, int position) {
 		IndexComponents comp;

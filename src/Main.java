@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 
 public class Main {
@@ -67,9 +68,39 @@ public class Main {
 			if (file.isFile() && !docId.equals(MAP_FILENAME)) {
 				System.out.println("Processing file: "+docId);
 			    List<String> tokens = Token.tokenizeFile(file.getAbsolutePath());
+			    int numTokens = tokens.size();
+			    
+			    // ----- TFDIF processing starts ------
+			    //Compute TF (Term Frequency)
+			    Map<String, Integer> tokensFrequencies = new HashMap<String, Integer>();
+			    for(int i = 0; i < numTokens; i++) {
+					if(tokensFrequencies.containsKey(tokens.get(i))){
+						int currentFrequency = (int) tokensFrequencies.get(tokens.get(i));
+						currentFrequency++;
+						tokensFrequencies.put(tokens.get(i).toString(), currentFrequency);
+					}else{
+						//If there is no token in the hashmap, add new
+						tokensFrequencies.put(tokens.get(i).toString(), 1);
+					}
+			    }
+			    
+			    //Compute TDIDF
+				Object[] frequenciesArray = tokensFrequencies.entrySet().toArray();
+			    for (Object e : frequenciesArray) {
+			        Entry<String, Integer> entry = (Map.Entry<String, Integer>) e;
+
+			        double tfValue = 1 + ( Math.log( entry.getValue() ) / Math.log(2) );
+			        double dfValue = documentsFrequencies.get(entry.getKey());
+			        double idfValue = Math.log( ( Math.abs( corpus ) / dfValue ) ) / Math.log(2);
+			        double tfidfValue = tfValue * idfValue;
+
+			        index.putTfidfIndex(entry.getKey(), docId, tfidfValue);
+			        //System.out.println(entry.getKey() + ", " + entry.getValue() + ", " + tfValue + ", " + dfValue + ", " + idfValue + ", " + tfidfValue);
+					//System.out.println(entry.getKey() + " - " + tfidfValue);	
+			    }
+			    // ------- end ---------
 			    
 			    // ----- position index processing starts ------
-			    int numTokens = tokens.size();
 			    for(int i=0; i<numTokens; i++) {
 			    	int position = i;
 			    	index.putPositionIndex(tokens.get(i), docId, position);
