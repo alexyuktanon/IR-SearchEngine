@@ -22,6 +22,7 @@ public class Main {
 		final long startTime = System.currentTimeMillis();
 		
 		//----- DF (Document Frequency) processing starts ------
+		int corpus = 0;
 		Map<String, Integer> documentsFrequencies = new HashMap<String, Integer>();
 		for (File file : listOfFiles) {
 			String docId = file.getName();
@@ -48,10 +49,14 @@ public class Main {
 						//If there is no token in the hashmap, add new
 						documentsFrequencies.put(uniqueTokens.get(i).toString(), 1);
 					}
-			    }		    	
+			    }
+			    
+			    //Update corpus frequency
+			    corpus++;
 			}
 		}
-//		System.out.println("DF "+documentsFrequencies);
+		//System.out.println("DF " + documentsFrequencies);
+		//System.out.println("Corpus " + corpus);
 		// ------- end ---------
 		
 		for (File file : listOfFiles) {
