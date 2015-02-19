@@ -1,7 +1,12 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class Main {
@@ -15,6 +20,39 @@ public class Main {
 		
 		Index index = new Index();
 		final long startTime = System.currentTimeMillis();
+		
+		//----- DF (Document Frequency) processing starts ------
+		Map<String, Integer> documentsFrequencies = new HashMap<String, Integer>();
+		for (File file : listOfFiles) {
+			String docId = file.getName();
+			
+			if (file.isFile() && !docId.equals(MAP_FILENAME)) {
+				System.out.println("DF Processing file: "+docId);
+				List<String> tokens = Token.tokenizeFile(file.getAbsolutePath());
+
+				//Compute unique tokens
+		    	Set<String> uniqueTokensSet = new HashSet<String>();
+		    	for(int i = 0; i < tokens.size(); i++){
+		    		uniqueTokensSet.add((String) tokens.get(i));
+		    	}
+		    	List<String> uniqueTokens = new ArrayList<String>(uniqueTokensSet);
+
+		    	//Compute document frequency
+		    	int numTokens = uniqueTokens.size();
+			    for(int i = 0; i < numTokens; i++) {
+					if(documentsFrequencies.containsKey(uniqueTokens.get(i))){
+						int currentFrequency = (int) documentsFrequencies.get(uniqueTokens.get(i));
+						currentFrequency++;
+						documentsFrequencies.put(uniqueTokens.get(i).toString(), currentFrequency);
+					}else{
+						//If there is no token in the hashmap, add new
+						documentsFrequencies.put(uniqueTokens.get(i).toString(), 1);
+					}
+			    }		    	
+			}
+		}
+//		System.out.println("DF "+documentsFrequencies);
+		// ------- end ---------
 		
 		for (File file : listOfFiles) {
 			// all index processing should be in here
