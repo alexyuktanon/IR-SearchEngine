@@ -34,14 +34,10 @@ public class Index {
 	}
 	
 	private class IndexComponents {
-//		private List<Tuple> tfidfTuples;
 		private Map<String, Double> tfidfTuples;
 		private MultiMap<String, Integer> positionTuples;
 		
-//		private Map<String, <double, List<double> >
-		
 		public IndexComponents() {
-//			tfidfTuples = new ArrayList<Index.Tuple>();
 			tfidfTuples = new HashMap<String, Double>();
 			positionTuples = new MultiValueMap<String, Integer>();
 		}
@@ -54,9 +50,9 @@ public class Index {
 			positionTuples.put(word, position);
 		}
 		
-//		public List<Tuple> getTfidfTuples() {
-//			return tfidfTuples;
-//		}
+		public Map<String, Double> getTfidfTuples() {
+			return tfidfTuples;
+		}
 		
 		public MultiMap<String, Integer> getPositionTuples() {
 			return positionTuples;
