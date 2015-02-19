@@ -98,6 +98,10 @@ public class Index {
 		index.put(word, comp);
 	}
 	
+	public Map<String, Double> getTfidfMap(String word) {
+		return index.get(word).getTfidfTuples();
+	}
+	
 	public MultiMap<String, Integer> getPositionMap(String word) {
 		return index.get(word).getPositionTuples();
 	}
@@ -122,11 +126,22 @@ public class Index {
 	// For testing: should have put it into unittests folder but not sure how to create
 	public static void main(String args[]) {
 		Index index = new Index();
+		index.putTfidfIndex("word", "d1", 0.5);
+		index.putTfidfIndex("word", "d2", 1);
+		index.putTfidfIndex("w2", "d1", 2);
 		index.putPositionIndex("word", "d1", 1);
 		index.putPositionIndex("word", "d1", 5);
 		index.putPositionIndex("word", "d2", 1);
 		index.putPositionIndex("w2", "d1", 2);
 		System.out.println(index.toString());
+		
+		System.out.println("+++ TFDIF TEST +++");
+		Map<String, Double> tfidfMap = index.getTfidfMap("word");
+		for(Object key : tfidfMap.keySet()) {
+			System.out.println(key + " : " + tfidfMap.get(key));
+		}
+		
+		System.out.println("\n+++ POSITION TEST +++");
 		MultiMap<String, Integer> positionMap = index.getPositionMap("word");
 		for(Object key : positionMap.keySet()) {
 			System.out.println(key + " : " + positionMap.get(key));
