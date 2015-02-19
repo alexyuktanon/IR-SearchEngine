@@ -110,9 +110,8 @@ public class Main {
 			
 		}
 		
-		PrintWriter out = new PrintWriter("result.txt");
-		out.print(index.toString());
-		out.close();
+		//Print index to file
+		index.toFile();
 		
 		final long endTime = System.currentTimeMillis();
 		

@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -111,6 +113,14 @@ public class Index {
 			sBuilder.append("Word: " + w + "\n" + index.get(w).toString());
 		}
 		return sBuilder.toString();
+	}
+	
+	public void toFile() throws FileNotFoundException{
+		PrintWriter out = new PrintWriter("result.txt");
+		for(String w : index.keySet()) {
+			out.print("Word: " + w + "\n" + index.get(w).toString());
+		}
+		out.close();
 	}
 	
 	// For testing: should have put it into unittests folder but not sure how to create
