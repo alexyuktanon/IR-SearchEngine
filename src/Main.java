@@ -110,7 +110,7 @@ public class Main {
 			
 		}
 		
-		PrintWriter out = new PrintWriter("out.txt");
+		PrintWriter out = new PrintWriter("result.txt");
 		out.print(index.toString());
 		out.close();
 		
