@@ -1,37 +1,20 @@
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MultiMap;
 import org.apache.commons.collections4.map.MultiValueMap;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
 
 
 public class Index {
-	
-	private class Tuple {
-		private String docId;
-		private double val;
-		
-		public Tuple(String docId, double val) {
-			this.docId = docId;
-			this.val = val;
-		}
-		public double getVal() {
-			return val;
-		}
-		public String getDocId() {
-			return docId;
-		}
-		@Override
-		public String toString() {
-			return "("+docId+","+val+")";
-		}
-		
-	}
 	
 	private class IndexComponents {
 		private Map<String, Double> tfidfTuples;
@@ -61,16 +44,6 @@ public class Index {
 		@Override
 		public String toString(){
 			return "TFIDF: " + tfidfTuples.toString() + "\n" + "position index: " + positionTuples.toString() + "\n";
-		}
-		
-		private String listToString(List<Tuple> l) {
-			if(l.isEmpty()) return "empty";
-
-			String s = "";
-			for(Tuple t : l) {
-				s += t.toString() + " ";
-			}
-			return s;
 		}
 	}
 
@@ -115,6 +88,30 @@ public class Index {
 		return sBuilder.toString();
 	}
 	
+	private Index(Map<String, IndexComponents> index) {
+		this.index = index;
+	}
+	
+	public Index() {}
+	
+	public String toJson() throws JsonGenerationException, JsonMappingException, IOException {
+		return toJson(false);
+	}
+
+	public String toJson(boolean prettyPrinter) throws JsonGenerationException, JsonMappingException, IOException {
+		ObjectWriter ow = new ObjectMapper().writer();
+		if(prettyPrinter) {
+			ow = ow.withDefaultPrettyPrinter();
+		}
+		return ow.writeValueAsString(index);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Index fromJson(String json) throws JsonParseException, JsonMappingException, IOException {
+		return new Index(new ObjectMapper().readValue(json, HashMap.class));
+	}
+	
+	
 	public void toFile() throws FileNotFoundException{
 		PrintWriter out = new PrintWriter("result.txt");
 		for(String w : index.keySet()) {
@@ -145,8 +142,22 @@ public class Index {
 		MultiMap<String, Integer> positionMap = index.getPositionMap("word");
 		for(Object key : positionMap.keySet()) {
 			System.out.println(key + " : " + positionMap.get(key));
+			@SuppressWarnings("unchecked")
 			List<Integer> l = (List<Integer>) positionMap.get(key);
 			for(Integer i : l) System.out.println(i);
 		}
+		
+		try {
+			String json = index.toJson();
+			System.out.println(json);
+			Index index2 = Index.fromJson(json);
+			json = index2.toJson();
+			System.out.println(json);
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 }
