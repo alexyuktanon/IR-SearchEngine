@@ -65,7 +65,7 @@ public class Main {
 			String docId = file.getName();
 			
 			// check if its valid file
-			if (file.isFile() && !docId.equals(MAP_FILENAME)) {
+			if (file.isFile() && !docId.equals(MAP_FILENAME) && !docId.equals(".DS_Store")) {
 				System.out.println("Processing file: "+docId);
 			    List<String> tokens = Token.tokenizeFile(file.getAbsolutePath());
 			    int numTokens = tokens.size();
