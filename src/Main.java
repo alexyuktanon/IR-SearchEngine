@@ -25,6 +25,7 @@ public class Main {
 		//----- DF (Document Frequency) processing starts ------
 		int corpus = 0;
 		Map<String, Integer> documentsFrequencies = new HashMap<String, Integer>();
+		Set<String> uniqueTotalTokensSet = new HashSet<String>(); //For compute unique words
 		for (File file : listOfFiles) {
 			String docId = file.getName();
 			
@@ -36,6 +37,7 @@ public class Main {
 		    	Set<String> uniqueTokensSet = new HashSet<String>();
 		    	for(int i = 0; i < tokens.size(); i++){
 		    		uniqueTokensSet.add((String) tokens.get(i));
+		    		uniqueTotalTokensSet.add((String) tokens.get(i));
 		    	}
 		    	List<String> uniqueTokens = new ArrayList<String>(uniqueTokensSet);
 
@@ -56,8 +58,11 @@ public class Main {
 			    corpus++;
 			}
 		}
+		List<String> uniqueTotalTokens = new ArrayList<String>(uniqueTotalTokensSet);
+		
 		//System.out.println("DF " + documentsFrequencies);
 		//System.out.println("Corpus " + corpus);
+		//System.out.println("Total number of unique words: " + uniqueTotalTokens.size());
 		// ------- end ---------
 		
 		for (File file : listOfFiles) {
@@ -116,5 +121,6 @@ public class Main {
 		final long endTime = System.currentTimeMillis();
 		
 		System.out.println("Total execution time: " + (endTime - startTime) );
+		System.out.println("Total number of unique words: " + uniqueTotalTokens.size());
 	}
 }

@@ -114,9 +114,12 @@ public class Index {
 	
 	public void toFile() throws FileNotFoundException{
 		PrintWriter out = new PrintWriter("result.txt");
+		int totalNumWords = 0;
 		for(String w : index.keySet()) {
 			out.print("Word: " + w + "\n" + index.get(w).toString());
+			totalNumWords++;
 		}
+		out.print("Total number of unique words: " + totalNumWords);
 		out.close();
 	}
 	
