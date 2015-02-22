@@ -28,7 +28,7 @@ public class Main {
 		for (File file : listOfFiles) {
 			String docId = file.getName();
 			
-			if (file.isFile() && !docId.equals(MAP_FILENAME)) {
+			if (file.isFile() && !docId.equals(MAP_FILENAME) && !docId.equals(".DS_Store")) {
 				System.out.println("DF Processing file: "+docId);
 				List<String> tokens = Token.tokenizeFile(file.getAbsolutePath());
 
