@@ -123,6 +123,10 @@ public class Index {
 		out.close();
 	}
 	
+	public Integer size(){
+		return index.size();
+	}
+	
 	// For testing: should have put it into unittests folder but not sure how to create
 	public static void main(String args[]) {
 		Index index = new Index();
