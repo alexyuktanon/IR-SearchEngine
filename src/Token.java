@@ -13,20 +13,14 @@ public class Token {
 		List<String> out = new ArrayList<String>();
 		Scanner fileScanner;
 		fileScanner = new Scanner(textFile);
-		while (fileScanner.hasNextLine()) {
-	         String line = fileScanner.nextLine();
-	         Scanner wordScanner = new Scanner(line);
-	         
-	         while(wordScanner.hasNext()) {
-	        	 String word;
-        		 word = wordScanner.next();
-	        	 String[] words = word.split("[^a-zA-Z0-9]");
-	        	 for(int i=0; i<words.length; i++) {
-	        		 if(words[i].isEmpty()) continue;
-	        		 out.add(tokenize(words[i]));
-	        	 }
-	         }
-	         wordScanner.close();
+   	 	String word;
+		while (fileScanner.hasNext()) {
+    		 word = fileScanner.next();
+        	 String[] words = word.split("[^a-zA-Z0-9]");
+        	 for(int i=0; i<words.length; i++) {
+        		 if(words[i].isEmpty()) continue;
+        		 out.add(tokenize(words[i]));
+        	 }
 		}
 		fileScanner.close();
 		return out;
