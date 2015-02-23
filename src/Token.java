@@ -8,16 +8,11 @@ import java.util.Scanner;
 
 public class Token {
 	
-	@SuppressWarnings("resource")
-	public static List<String> tokenizeFile(String fileName) {
+	public static List<String> tokenizeFile(String fileName) throws FileNotFoundException {
 		File textFile = new File(fileName);
 		List<String> out = new ArrayList<String>();
 		Scanner fileScanner;
-		try {
-			fileScanner = new Scanner(textFile);
-		} catch (FileNotFoundException e) {
-			return out;
-		}
+		fileScanner = new Scanner(textFile);
 		while (fileScanner.hasNextLine()) {
 	         String line = fileScanner.nextLine();
 	         Scanner wordScanner = new Scanner(line);
@@ -31,7 +26,9 @@ public class Token {
 	        		 out.add(tokenize(words[i]));
 	        	 }
 	         }
+	         wordScanner.close();
 		}
+		fileScanner.close();
 		return out;
 		
 	}
