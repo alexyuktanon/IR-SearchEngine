@@ -75,10 +75,14 @@ public class Main {
 			    List<String> tokens = Token.tokenizeFile(file.getAbsolutePath());
 			    int numTokens = tokens.size();
 			    
-			    // ----- TFDIF processing starts ------
-			    //Compute TF (Term Frequency)
 			    Map<String, Integer> tokensFrequencies = new HashMap<String, Integer>();
 			    for(int i = 0; i < numTokens; i++) {
+			    	// ----- position index processing starts ------
+			    	int position = i;
+			    	index.putPositionIndex(tokens.get(i), docId, position);
+			    	// ------- endddd ---------
+			    	
+			    	// ----- Compute TF (Term Frequency) -----
 					if(tokensFrequencies.containsKey(tokens.get(i))){
 						int currentFrequency = (int) tokensFrequencies.get(tokens.get(i));
 						currentFrequency++;
@@ -89,11 +93,8 @@ public class Main {
 					}
 			    }
 			    
-			    //Compute TDIDF
-				Object[] frequenciesArray = tokensFrequencies.entrySet().toArray();
-			    for (Object e : frequenciesArray) {
-			        Entry<String, Integer> entry = (Map.Entry<String, Integer>) e;
-
+			    // ----- TFDIF processing starts ------
+			    for(Map.Entry<String, Integer> entry : tokensFrequencies.entrySet()){
 			        double tfValue = 1 + ( Math.log( entry.getValue() ) / Math.log(2) );
 			        double dfValue = documentsFrequencies.get(entry.getKey());
 			        double idfValue = Math.log( ( Math.abs( corpus ) / dfValue ) ) / Math.log(2);
@@ -104,13 +105,6 @@ public class Main {
 					//System.out.println(entry.getKey() + " - " + tfidfValue);	
 			    }
 			    // ------- end ---------
-			    
-			    // ----- position index processing starts ------
-			    for(int i=0; i<numTokens; i++) {
-			    	int position = i;
-			    	index.putPositionIndex(tokens.get(i), docId, position);
-			    }
-			    // ------- endddd ---------
 			} 
 			
 		}
@@ -121,6 +115,7 @@ public class Main {
 		final long endTime = System.currentTimeMillis();
 		
 		System.out.println("Total execution time: " + (endTime - startTime) );
-		System.out.println("Total number of unique words: " + uniqueTotalTokens.size());
+		System.out.println("Total number of unique words (By looping): " + uniqueTotalTokens.size());
+		System.out.println("Total number of unique words (By getting size): " + index.size());
 	}
 }
