@@ -121,6 +121,9 @@ public class Index {
 		}
 		out.print("Total number of unique words: " + totalNumWords);
 		out.close();
+	
+	public Integer size(){
+		return index.size();
 	}
 	
 	// For testing: should have put it into unittests folder but not sure how to create
