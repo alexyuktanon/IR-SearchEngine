@@ -1,6 +1,7 @@
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +76,11 @@ public class Index {
 		return index.get(word).getTfidfTuples();
 	}
 	
+	public List<Integer> getPosition(String word, String docId) {
+		if(!index.containsKey(word)) return new ArrayList<Integer>();
+		Object positions = index.get(word).getPositionTuples().get(docId);
+		return (List<Integer>) positions;
+	}
 	public MultiMap<String, Integer> getPositionMap(String word) {
 		return index.get(word).getPositionTuples();
 	}
