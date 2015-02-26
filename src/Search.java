@@ -35,30 +35,7 @@ public class Search {
 		// ------- end ---------
 		
 		// ----- Compute TF-IDF score for query -----
-		Double scoreQuery = 0.0;
-	    int numTokens = searchTokens.size();
-	    Map<String, Integer> tokensFrequencies = new HashMap<String, Integer>();
-	    for(int i = 0; i < numTokens; i++) {
-	    	// Compute TF
-			if(tokensFrequencies.containsKey(searchTokens.get(i))){
-				int currentFrequency = (int) tokensFrequencies.get(searchTokens.get(i));
-				currentFrequency++;
-				tokensFrequencies.put(searchTokens.get(i).toString(), currentFrequency);
-			}else{
-				//If there is no token in the hashmap, add new
-				tokensFrequencies.put(searchTokens.get(i).toString(), 1);
-			}
-	    }
-	    
-	    // Compute TF-IDF
-	    for(Map.Entry<String, Integer> entry : tokensFrequencies.entrySet()){
-	        double tfValue = entry.getValue();
-	        double idfValue = rootIndexNode.path(entry.getKey()).path("idf").getDoubleValue();
-	        double tfidfValue = tfValue * idfValue;
-	        tfidfValue = Math.round( tfidfValue * 10000.0 ) / 10000.0; //Round to 4 decimal
-
-	        scoreQuery = scoreQuery + tfidfValue;
-	    }
+		Double scoreQuery = computeQueryScore(searchTokens, rootIndexNode);
 	    // ------- end ---------
 		
 		// ----- Compute TF-IDF score for document given a query -----
@@ -85,4 +62,31 @@ public class Search {
 		return rootNode;
 	}
 	
+	public static Double computeQueryScore(List<String> tokens, JsonNode rootNode){
+		Double scoreQuery = 0.0;
+	    int numTokens = tokens.size();
+	    Map<String, Integer> tokensFrequencies = new HashMap<String, Integer>();
+	    for(int i = 0; i < numTokens; i++) {
+	    	// Compute TF
+			if(tokensFrequencies.containsKey(tokens.get(i))){
+				int currentFrequency = (int) tokensFrequencies.get(tokens.get(i));
+				currentFrequency++;
+				tokensFrequencies.put(tokens.get(i).toString(), currentFrequency);
+			}else{
+				//If there is no token in the hashmap, add new
+				tokensFrequencies.put(tokens.get(i).toString(), 1);
+			}
+	    }
+	    
+	    // Compute TF-IDF
+	    for(Map.Entry<String, Integer> entry : tokensFrequencies.entrySet()){
+	        double tfValue = entry.getValue();
+	        double idfValue = rootNode.path(entry.getKey()).path("idf").getDoubleValue();
+	        double tfidfValue = tfValue * idfValue;
+	        tfidfValue = Math.round( tfidfValue * 10000.0 ) / 10000.0; //Round to 4 decimal
+
+	        scoreQuery = scoreQuery + tfidfValue;
+	    }
+		return scoreQuery;
+	}
 }
