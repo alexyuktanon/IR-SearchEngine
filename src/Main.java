@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -111,12 +112,23 @@ public class Main {
 		}
 		
 		//Print index to file
-		index.toFile();
+//		index.toFile();
+		
+		//Save json to file
+		saveStringToFile(index.toJson());
+		
 		
 		final long endTime = System.currentTimeMillis();
 		
 		System.out.println("Total execution time: " + (endTime - startTime) );
 		System.out.println("Total number of unique words (By looping): " + uniqueTotalTokens.size());
 		System.out.println("Total number of unique words (By getting size): " + index.size());
+	}
+	
+	public static void saveStringToFile(String s) throws FileNotFoundException{
+		PrintWriter out = new PrintWriter("indexes.json.txt");
+		out.print(s);
+		out.close();
+		System.out.println("Save Json file completed");
 	}
 }
