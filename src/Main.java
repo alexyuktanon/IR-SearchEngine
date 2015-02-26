@@ -99,6 +99,7 @@ public class Main {
 			        double dfValue = documentsFrequencies.get(entry.getKey());
 			        double idfValue = Math.log( ( Math.abs( corpus ) / dfValue ) ) / Math.log(2);
 			        double tfidfValue = tfValue * idfValue;
+			        tfidfValue = Math.round( tfidfValue * 10000.0 ) / 10000.0; //Round to 4 decimal
 
 			        index.putTfidfIndex(entry.getKey(), docId, tfidfValue);
 			        //System.out.println(entry.getKey() + ", " + entry.getValue() + ", " + tfValue + ", " + dfValue + ", " + idfValue + ", " + tfidfValue);
