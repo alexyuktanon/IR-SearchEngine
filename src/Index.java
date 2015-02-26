@@ -18,6 +18,7 @@ import org.codehaus.jackson.map.ObjectWriter;
 public class Index {
 	
 	private class IndexComponents {
+		private Double idf;
 		private Map<String, Double> tfidfTuples;
 		private MultiMap<String, Integer> positionTuples;
 		
@@ -26,12 +27,20 @@ public class Index {
 			positionTuples = new MultiValueMap<String, Integer>();
 		}
 		
+		public void putIdf(double frequency) {
+			idf = frequency;
+		}
+		
 		public void putTfidfTuple(String word, double frequency) {
 			tfidfTuples.put(word, frequency);
 		}
 		
 		public void putPositionTuple(String word, int position) {
 			positionTuples.put(word, position);
+		}
+		
+		public Double getIdf() {
+			return idf;
 		}
 		
 		public Map<String, Double> getTfidfTuples() {
@@ -44,11 +53,24 @@ public class Index {
 		
 		@Override
 		public String toString(){
-			return "TFIDF: " + tfidfTuples.toString() + "\n" + "position index: " + positionTuples.toString() + "\n";
+			return "IDF: " + idf.toString() + "\n" +
+				   "TFIDF: " + tfidfTuples.toString() + "\n" +
+				   "position index: " + positionTuples.toString() + "\n";
 		}
 	}
 
 	private Map<String, IndexComponents> index = new HashMap<String, IndexComponents>(); // map word to indexes
+	
+	public void putIdfIndex(String word, double frequency) {
+		IndexComponents comp;
+		if(!index.containsKey(word)) {
+			comp = new IndexComponents();
+		} else {
+			comp = index.get(word);
+		}
+		comp.putIdf(frequency);
+		index.put(word, comp);
+	}
 	
 	public void putTfidfIndex(String word, String docId, double frequency) {
 		IndexComponents comp;
@@ -70,6 +92,10 @@ public class Index {
 		}
 		comp.putPositionTuple(docId, position);
 		index.put(word, comp);
+	}
+	
+	public Double getIdf(String word) {
+		return index.get(word).getIdf();
 	}
 	
 	public Map<String, Double> getTfidfMap(String word) {
@@ -136,6 +162,8 @@ public class Index {
 	// For testing: should have put it into unittests folder but not sure how to create
 	public static void main(String args[]) {
 		Index index = new Index();
+		index.putIdfIndex("word", 0.0);
+		index.putIdfIndex("w2", 1.0);
 		index.putTfidfIndex("word", "d1", 0.5);
 		index.putTfidfIndex("word", "d2", 1);
 		index.putTfidfIndex("w2", "d1", 2);
@@ -145,7 +173,12 @@ public class Index {
 		index.putPositionIndex("w2", "d1", 2);
 		System.out.println(index.toString());
 		
-		System.out.println("+++ TFDIF TEST +++");
+		System.out.println("+++ IDF TEST +++");
+		String token = "word";
+		Double idf = index.getIdf(token);
+		System.out.println(token + " : " + idf);
+		
+		System.out.println("\n+++ TFIDF TEST +++");
 		Map<String, Double> tfidfMap = index.getTfidfMap("word");
 		for(Object key : tfidfMap.keySet()) {
 			System.out.println(key + " : " + tfidfMap.get(key));
