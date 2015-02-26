@@ -100,8 +100,10 @@ public class Main {
 			        double dfValue = documentsFrequencies.get(entry.getKey());
 			        double idfValue = Math.log( ( Math.abs( corpus ) / dfValue ) ) / Math.log(2);
 			        double tfidfValue = tfValue * idfValue;
+			        idfValue = Math.round( idfValue * 10000.0 ) / 10000.0; //Round to 4 decimal
 			        tfidfValue = Math.round( tfidfValue * 10000.0 ) / 10000.0; //Round to 4 decimal
 
+			        index.putIdfIndex(entry.getKey(), idfValue);
 			        index.putTfidfIndex(entry.getKey(), docId, tfidfValue);
 			        //System.out.println(entry.getKey() + ", " + entry.getValue() + ", " + tfValue + ", " + dfValue + ", " + idfValue + ", " + tfidfValue);
 					//System.out.println(entry.getKey() + " - " + tfidfValue);	
@@ -112,7 +114,7 @@ public class Main {
 		}
 		
 		//Print index to file
-//		index.toFile();
+		index.toFile();
 		
 		//Save json to file
 		saveStringToFile(index.toJson());
