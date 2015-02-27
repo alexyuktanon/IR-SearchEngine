@@ -22,27 +22,28 @@ public class Search {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Set<String> relevantDocs = getRelevantDocuments(searchTokens, rootIndexNode);
-		// ------- end ---------
-		
-		// ----- Compute TF-IDF score for query -----
-		Map<String, Double> scoreQueries = computeQueryScore(searchTokens, rootIndexNode);
-	    // ------- end ---------
-		
-		// ----- Compute Cosine Similarity -----
-		Map<String, Double> AllCosineScores = computeCosineScores(relevantDocs, searchTokens, rootIndexNode, scoreQueries);
-	    // ------- end ---------
-	    
-		// ----- Compare and Process Result -----
-		List<Map.Entry<String, Double>> rankedScores = rankScore(AllCosineScores);
-	    // ------- end ---------
-		
-	    // ----- Testing Part -----
-		System.out.println("Relevant Docs: " + relevantDocs);
-		System.out.println("TF-IDF Score of each query: " + scoreQueries);
-		System.out.println("Total TF-IDF Score of query: " + computeTotalQueryScore(scoreQueries));
-		System.out.println("Cosine score for each document from every query: " + AllCosineScores);
-		System.out.println("Ranked score: " + rankedScores);
+//		Index index = Index.fromJson(json)
+//		Set<String> relevantDocs = getRelevantDocuments(searchTokens, rootIndexNode);
+//		// ------- end ---------
+//		
+//		// ----- Compute TF-IDF score for query -----
+//		Map<String, Double> scoreQueries = computeQueryScore(searchTokens, rootIndexNode);
+//	    // ------- end ---------
+//		
+//		// ----- Compute Cosine Similarity -----
+//		Map<String, Double> AllCosineScores = computeCosineScores(relevantDocs, searchTokens, rootIndexNode, scoreQueries);
+//	    // ------- end ---------
+//	    
+//		// ----- Compare and Process Result -----
+//		List<Map.Entry<String, Double>> rankedScores = rankScore(AllCosineScores);
+//	    // ------- end ---------
+//		
+//	    // ----- Testing Part -----
+//		System.out.println("Relevant Docs: " + relevantDocs);
+//		System.out.println("TF-IDF Score of each query: " + scoreQueries);
+//		System.out.println("Total TF-IDF Score of query: " + computeTotalQueryScore(scoreQueries));
+//		System.out.println("Cosine score for each document from every query: " + AllCosineScores);
+//		System.out.println("Ranked score: " + rankedScores);
 		// ------- end ---------
 	}
 	
@@ -69,7 +70,7 @@ public class Search {
 		return relevantDocs;
 	}
 	
-	public static Map<String, Double> computeQueryScore(List<String> tokens, JsonNode rootNode){
+	public static Map<String, Double> computeQueryScore(List<String> tokens, Index index){
 	    int numTokens = tokens.size();
 	    Map<String, Integer> tokensFrequencies = new HashMap<String, Integer>();
 	    for(int i = 0; i < numTokens; i++) {
@@ -88,7 +89,7 @@ public class Search {
 	    Map<String, Double> scoreQueries = new HashMap<String, Double>();
 	    for(Map.Entry<String, Integer> entry : tokensFrequencies.entrySet()){
 	        double tfValue = entry.getValue();
-	        double idfValue = rootNode.path(entry.getKey()).path("idf").getDoubleValue();
+	        double idfValue = index.getIdf(entry.getKey());
 	        double tfidfValue = tfValue * idfValue;
 	        tfidfValue = Math.round( tfidfValue * 10000.0 ) / 10000.0; //Round to 4 decimal
 
@@ -115,7 +116,7 @@ public class Search {
 	}
 	
 	public static Map<String, Double> computeCosineScores(Set<String> documents, List<String> tokens,
-														  JsonNode rootNode, Map<String, Double> scoreQueries){
+														  Index index, Map<String, Double> scoreQueries){
 		Map<String, Double> cosineScores = new HashMap<String, Double>();
 		for(String doc : documents){
 			Double sumQD = 0.0;
@@ -123,10 +124,10 @@ public class Search {
 			Double sumD2 = 0.0;
 			
 			for(String token : tokens){
-				JsonNode wordNode = rootNode.path(token);
 				// Compute cosine(query,doucment) score
 				Double q = scoreQueries.get(token);
-				Double d = wordNode.path("tfidfTuples").path(doc).getDoubleValue();
+				Double d = index.getTfidfMap(token).get(doc);
+				d = (d==null) ? 0 : d;
 				Double qd = q * d;
 				Double q2 = Math.pow(q,2);
 				Double d2 = Math.pow(d,2);
@@ -149,7 +150,7 @@ public class Search {
 		Collections.sort(scoreList, new Comparator<Map.Entry<String, Double>>() {
 			public int compare(Map.Entry<String, Double> o1,
                                            Map.Entry<String, Double> o2) {
-				return (o1.getValue()).compareTo(o2.getValue()); // -> descending order
+				return (o2.getValue()).compareTo(o1.getValue()); // -> descending order
 			}
 		});
 		
