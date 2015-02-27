@@ -1,3 +1,4 @@
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -8,9 +9,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 public class Search {
 
-	public static void main (String [] args){
+	public static void main (String [] args){ 
 		// ----- Set up query for search -----
-		String searchQuery = "";
+		String searchQuery = "machine learning";
 		List<String> searchTokens = Token.tokenizeText(searchQuery);
 		// ------- end ---------
 		
@@ -56,7 +57,7 @@ public class Search {
 	public static JsonNode getIndexes() throws IOException{	
 		//Get indexes from JSON file
 		ObjectMapper mapper = new ObjectMapper();
-		File jsonFile = new File("./indexes.json.txt"); 
+		File jsonFile = new File(Config.INDEX_PATH); 
 		JsonNode rootNode = mapper.readTree(jsonFile);
 		
 		return rootNode;
