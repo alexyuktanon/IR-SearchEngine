@@ -38,8 +38,8 @@ public class Search {
 		Double scoreQuery = computeQueryScore(searchTokens, rootIndexNode);
 	    // ------- end ---------
 		
-		// ----- Compute TF-IDF score for document given a query -----
-		Map<String, Double> scoreTermDocument = computeTermDocumentScore(relevantDocs, searchTokens, rootIndexNode);
+		// ----- Compute TF-IDF score for each document by a term given in a query -----
+		Map<String, Double> scoreTermDocument = computeTotalTermDocumentScore(relevantDocs, searchTokens, rootIndexNode);
 	    // ------- end ---------
 	    
 		// ----- Compute Cosine Similarity -----
@@ -92,7 +92,7 @@ public class Search {
 		return scoreQuery;
 	}
 	
-	public static Map<String, Double> computeTermDocumentScore(Set<String> documents, List<String> tokens, JsonNode rootNode){
+	public static Map<String, Double> computeTotalTermDocumentScore(Set<String> documents, List<String> tokens, JsonNode rootNode){
 		Map<String, Double> scoreTermDocument = new HashMap<String, Double>();
 		for(String doc : documents){
 			for(String token : tokens){
