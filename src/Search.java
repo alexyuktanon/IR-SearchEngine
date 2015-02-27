@@ -116,26 +116,19 @@ public class Search {
 			
 			for(String token : tokens){
 				JsonNode wordNode = rootNode.path(token);
-				Iterator<Map.Entry<String,JsonNode>> ite = wordNode.path("tfidfTuples").getFields();
-				while (ite.hasNext()) {
-					Entry<String,JsonNode> temp = ite.next();
-					// Check for relevant documents only
-					if(doc == temp.getKey().toString()){
-						// Compute cosine(query,doucment) score
-						Double q = scoreQueries.get(token);
-						Double d = temp.getValue().asDouble();
-						Double qd = q * d;
-						Double q2 = Math.pow(q,2);
-						Double d2 = Math.pow(d,2);
-						
-						sumQD = sumQD + qd;
-						sumQ2 = sumQ2 + q2;
-						sumD2 = sumD2 + d2;
-					}
-				}
+				// Compute cosine(query,doucment) score
+				Double q = scoreQueries.get(token);
+				Double d = wordNode.path("tfidfTuples").path(doc).getDoubleValue();
+				Double qd = q * d;
+				Double q2 = Math.pow(q,2);
+				Double d2 = Math.pow(d,2);
+				
+				sumQD = sumQD + qd;
+				sumQ2 = sumQ2 + q2;
+				sumD2 = sumD2 + d2;
 			}
-			Double queriesDocumentCosineScore = sumQD / ( Math.sqrt(sumQ2) * Math.sqrt(sumD2) );
 			
+			Double queriesDocumentCosineScore = sumQD / ( Math.sqrt(sumQ2) * Math.sqrt(sumD2) );
 			cosineScores.put(doc, queriesDocumentCosineScore);
 		}
 		return cosineScores;
