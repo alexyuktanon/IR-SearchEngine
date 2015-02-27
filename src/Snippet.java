@@ -186,7 +186,7 @@ public class Snippet {
 			numWords += intervals.get(i).num;
 		}
 		Collections.sort(outputIntervals, new IntervalRangeComparator());
-		return getSnippet(outputIntervals, doc);
+		return getSnippet(outputIntervals, doc).trim().replaceAll("\\s+", " ");
 	}
 	
 	// basic testing
