@@ -39,6 +39,7 @@ public class Search {
 	    // ------- end ---------
 		
 		// ----- Compute TF-IDF score for document given a query -----
+		Map<String, Double> scoreTermDocument = computeTermDocumentScore(relevantDocs, searchTokens, rootIndexNode);
 	    // ------- end ---------
 	    
 		// ----- Compute Cosine Similarity -----
@@ -50,6 +51,7 @@ public class Search {
 	    // ----- Testing Part -----
 		System.out.println("Relevant Docs: " + relevantDocs);
 		System.out.println("Score of Query: " + scoreQuery);
+		System.out.println("Score of Term-Document: " + scoreTermDocument);
 		// ------- end ---------
 	}
 	
@@ -88,5 +90,30 @@ public class Search {
 	        scoreQuery = scoreQuery + tfidfValue;
 	    }
 		return scoreQuery;
+	}
+	
+	public static Map<String, Double> computeTermDocumentScore(Set<String> documents, List<String> tokens, JsonNode rootNode){
+		Map<String, Double> scoreTermDocument = new HashMap<String, Double>();
+		for(String doc : documents){
+			for(String token : tokens){
+				JsonNode wordNode = rootNode.path(token);
+				Iterator<Map.Entry<String,JsonNode>> ite = wordNode.path("tfidfTuples").getFields();
+				while (ite.hasNext()) {
+					Entry<String,JsonNode> temp = ite.next();
+					// Check for relevant documents only
+					if(doc == temp.getKey().toString()){
+						if(scoreTermDocument.containsKey(doc)){
+							Double currentScore = (Double) scoreTermDocument.get(doc);
+							currentScore = currentScore + temp.getValue().asDouble();
+							scoreTermDocument.put(doc, currentScore);
+						}else{
+							//If there is no doc in the hashmap, add new
+							scoreTermDocument.put(doc, temp.getValue().asDouble());
+						}
+					}
+				}
+			}
+		}
+		return scoreTermDocument;
 	}
 }
