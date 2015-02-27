@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.collections4.MultiMap;
 import org.apache.commons.collections4.map.MultiValueMap;
@@ -13,51 +14,12 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
+import org.codehaus.jackson.type.TypeReference;
 
 
 public class Index {
 	
-	private class IndexComponents {
-		private Double idf;
-		private Map<String, Double> tfidfTuples;
-		private MultiMap<String, Integer> positionTuples;
-		
-		public IndexComponents() {
-			tfidfTuples = new HashMap<String, Double>();
-			positionTuples = new MultiValueMap<String, Integer>();
-		}
-		
-		public void putIdf(double frequency) {
-			idf = frequency;
-		}
-		
-		public void putTfidfTuple(String word, double frequency) {
-			tfidfTuples.put(word, frequency);
-		}
-		
-		public void putPositionTuple(String word, int position) {
-			positionTuples.put(word, position);
-		}
-		
-		public Double getIdf() {
-			return idf;
-		}
-		
-		public Map<String, Double> getTfidfTuples() {
-			return tfidfTuples;
-		}
-		
-		public MultiMap<String, Integer> getPositionTuples() {
-			return positionTuples;
-		}
-		
-		@Override
-		public String toString(){
-			return "IDF: " + idf.toString() + "\n" +
-				   "TFIDF: " + tfidfTuples.toString() + "\n" +
-				   "position index: " + positionTuples.toString() + "\n";
-		}
-	}
+	
 
 	private Map<String, IndexComponents> index = new HashMap<String, IndexComponents>(); // map word to indexes
 	
@@ -105,6 +67,7 @@ public class Index {
 	public List<Integer> getPosition(String word, String docId) {
 		if(!index.containsKey(word)) return new ArrayList<Integer>();
 		Object positions = index.get(word).getPositionTuples().get(docId);
+		if(positions == null) return new ArrayList<Integer>();
 		return (List<Integer>) positions;
 	}
 	public MultiMap<String, Integer> getPositionMap(String word) {
@@ -138,9 +101,25 @@ public class Index {
 		return ow.writeValueAsString(index);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Index fromJson(String json) throws JsonParseException, JsonMappingException, IOException {
-		return new Index(new ObjectMapper().readValue(json, HashMap.class));
+		Map<String, IndexComponents> outIndex = new HashMap<String, IndexComponents>();
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> mapObject = mapper.readValue(json,
+				new TypeReference<Map<String, Object>>() {
+				});
+		for(String key : mapObject.keySet()) {
+			Map<String, Object> val = (HashMap<String, Object>) mapObject.get(key);
+			Double idf = (Double) val.get("idf");
+			Map<String, Double> tfidf = (Map<String, Double>) val.get("tfidfTuples");
+			Map<String, List<Integer>> positions = (Map<String, List<Integer>>) val.get("positionTuples");
+			MultiValueMap<String, Integer> pos = new MultiValueMap<String, Integer>();
+			for(Entry<String, List<Integer>> entry : positions.entrySet()) {
+				pos.putAll(entry.getKey(), entry.getValue());
+			}
+			IndexComponents comp = new IndexComponents(idf, tfidf, pos);
+			outIndex.put(key, comp);
+		}
+		return new Index(outIndex);
 	}
 	
 	
@@ -200,6 +179,8 @@ public class Index {
 			json = index2.toJson();
 			System.out.println(json);
 			
+			System.out.println(index2.getTfidfMap("word"));
+			System.out.println(index2.getPositionMap("word"));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

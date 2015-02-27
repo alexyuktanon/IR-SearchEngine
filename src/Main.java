@@ -13,12 +13,8 @@ import java.util.Map.Entry;
 
 public class Main {
 	
-	public static final String ROOT_FOLDER = "./data/crawl/root/";
-	public static final String MAP_FILENAME = "map.txt";
-	public static final String MAP_PATH = ROOT_FOLDER+MAP_FILENAME;
-	
 	public static void main(String args[]) throws IOException {
-		File[] listOfFiles = new File(ROOT_FOLDER).listFiles();
+		File[] listOfFiles = new File(Config.ROOT_FOLDER).listFiles();
 		
 		Index index = new Index();
 		final long startTime = System.currentTimeMillis();
@@ -30,7 +26,7 @@ public class Main {
 		for (File file : listOfFiles) {
 			String docId = file.getName();
 			
-			if (file.isFile() && !docId.equals(MAP_FILENAME) && !docId.equals(".DS_Store")) {
+			if (file.isFile() && !docId.equals(Config.MAP_FILENAME) && !docId.equals(".DS_Store")) {
 				System.out.println("DF Processing file: "+docId);
 				List<String> tokens = Token.tokenizeFile(file.getAbsolutePath());
 
@@ -71,7 +67,7 @@ public class Main {
 			String docId = file.getName();
 			
 			// check if its valid file
-			if (file.isFile() && !docId.equals(MAP_FILENAME) && !docId.equals(".DS_Store")) {
+			if (file.isFile() && !docId.equals(Config.MAP_FILENAME) && !docId.equals(".DS_Store")) {
 				System.out.println("Processing file: "+docId);
 			    List<String> tokens = Token.tokenizeFile(file.getAbsolutePath());
 			    int numTokens = tokens.size();
@@ -114,10 +110,10 @@ public class Main {
 		}
 		
 		//Print index to file
-		index.toFile();
+//		index.toFile();
 		
 		//Save json to file
-		saveStringToFile(index.toJson());
+		saveStringToFile(index.toJson(true));
 		
 		
 		final long endTime = System.currentTimeMillis();
@@ -128,7 +124,7 @@ public class Main {
 	}
 	
 	public static void saveStringToFile(String s) throws FileNotFoundException{
-		PrintWriter out = new PrintWriter("indexes.json.txt");
+		PrintWriter out = new PrintWriter(Config.INDEX_PATH);
 		out.print(s);
 		out.close();
 		System.out.println("Save Json file completed");
