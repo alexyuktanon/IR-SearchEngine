@@ -19,19 +19,9 @@ public class Search {
 		try {
 			rootIndexNode = getIndexes();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		Set<String> relevantDocs = new HashSet<String>();
-		for(String token : searchTokens){
-			JsonNode wordNode = rootIndexNode.path(token);
-			Iterator<Map.Entry<String,JsonNode>> ite = wordNode.path("tfidfTuples").getFields();
-			while (ite.hasNext()) {
-				Entry<String,JsonNode> temp = ite.next();
-				relevantDocs.add(temp.getKey());
-			}
-		}
+		Set<String> relevantDocs = getRelevantDocuments(searchTokens, rootIndexNode);
 		// ------- end ---------
 		
 		// ----- Compute TF-IDF score for query -----
@@ -62,6 +52,20 @@ public class Search {
 		JsonNode rootNode = mapper.readTree(jsonFile);
 		
 		return rootNode;
+	}
+	
+	public static Set<String> getRelevantDocuments(List<String> searchTokens, JsonNode rootIndexNode){
+		Set<String> relevantDocs = new HashSet<String>();
+		for(String token : searchTokens){
+			JsonNode wordNode = rootIndexNode.path(token);
+			Iterator<Map.Entry<String,JsonNode>> ite = wordNode.path("tfidfTuples").getFields();
+			while (ite.hasNext()) {
+				Entry<String,JsonNode> temp = ite.next();
+				relevantDocs.add(temp.getKey());
+			}
+		}
+		
+		return relevantDocs;
 	}
 	
 	public static Map<String, Double> computeQueryScore(List<String> tokens, JsonNode rootNode){
