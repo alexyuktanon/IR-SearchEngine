@@ -20,19 +20,9 @@ public class Search {
 		try {
 			rootIndexNode = getIndexes();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		Set<String> relevantDocs = new HashSet<String>();
-		for(String token : searchTokens){
-			JsonNode wordNode = rootIndexNode.path(token);
-			Iterator<Map.Entry<String,JsonNode>> ite = wordNode.path("tfidfTuples").getFields();
-			while (ite.hasNext()) {
-				Entry<String,JsonNode> temp = ite.next();
-				relevantDocs.add(temp.getKey());
-			}
-		}
+		Set<String> relevantDocs = getRelevantDocuments(searchTokens, rootIndexNode);
 		// ------- end ---------
 		
 		// ----- Compute TF-IDF score for query -----
@@ -44,6 +34,7 @@ public class Search {
 	    // ------- end ---------
 	    
 		// ----- Compare and Process Result -----
+		List<Map.Entry<String, Double>> rankedScores = rankScore(AllCosineScores);
 	    // ------- end ---------
 		
 	    // ----- Testing Part -----
@@ -51,6 +42,7 @@ public class Search {
 		System.out.println("TF-IDF Score of each query: " + scoreQueries);
 		System.out.println("Total TF-IDF Score of query: " + computeTotalQueryScore(scoreQueries));
 		System.out.println("Cosine score for each document from every query: " + AllCosineScores);
+		System.out.println("Ranked score: " + rankedScores);
 		// ------- end ---------
 	}
 	
@@ -63,8 +55,21 @@ public class Search {
 		return rootNode;
 	}
 	
+	public static Set<String> getRelevantDocuments(List<String> searchTokens, JsonNode rootIndexNode){
+		Set<String> relevantDocs = new HashSet<String>();
+		for(String token : searchTokens){
+			JsonNode wordNode = rootIndexNode.path(token);
+			Iterator<Map.Entry<String,JsonNode>> ite = wordNode.path("tfidfTuples").getFields();
+			while (ite.hasNext()) {
+				Entry<String,JsonNode> temp = ite.next();
+				relevantDocs.add(temp.getKey());
+			}
+		}
+		
+		return relevantDocs;
+	}
+	
 	public static Map<String, Double> computeQueryScore(List<String> tokens, JsonNode rootNode){
-		Double scoreQuery = 0.0;
 	    int numTokens = tokens.size();
 	    Map<String, Integer> tokensFrequencies = new HashMap<String, Integer>();
 	    for(int i = 0; i < numTokens; i++) {
@@ -96,6 +101,7 @@ public class Search {
 				scoreQueries.put(entry.getKey().toString(), tfidfValue);
 			}
 	    }
+	    
 		return scoreQueries;
 	}
 	
@@ -104,6 +110,7 @@ public class Search {
 		for(Map.Entry<String, Double> entry : scoreQueries.entrySet()){
 			totalScoreQuery = totalScoreQuery + entry.getValue();
 		}
+		
 		return totalScoreQuery;
 	}
 	
@@ -132,7 +139,21 @@ public class Search {
 			Double queriesDocumentCosineScore = sumQD / ( Math.sqrt(sumQ2) * Math.sqrt(sumD2) );
 			cosineScores.put(doc, queriesDocumentCosineScore);
 		}
+		
 		return cosineScores;
 	}
 
+	private static List<Map.Entry<String, Double>> rankScore(Map<String, Double> scoreMap) { 
+	    // Sort map in increasing order
+	    List<Map.Entry<String, Double>> scoreList = new LinkedList<Map.Entry<String, Double> >(scoreMap.entrySet());
+		Collections.sort(scoreList, new Comparator<Map.Entry<String, Double>>() {
+			public int compare(Map.Entry<String, Double> o1,
+                                           Map.Entry<String, Double> o2) {
+				return (o1.getValue()).compareTo(o2.getValue()); // -> descending order
+			}
+		});
+		
+	    return scoreList;
+	}
+	
 }
