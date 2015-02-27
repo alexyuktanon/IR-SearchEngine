@@ -2,8 +2,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,16 +55,7 @@ public class Main2 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		Set<String> relevantDocs = new HashSet<String>();
-		for(String token : searchTokens){
-			JsonNode wordNode = rootIndexNode.path(token);
-			Iterator<Map.Entry<String,JsonNode>> ite = wordNode.path("tfidfTuples").getFields();
-			while (ite.hasNext()) {
-				Entry<String,JsonNode> temp = ite.next();
-				relevantDocs.add(temp.getKey());
-			}
-		}
+		Set<String> relevantDocs = Search.getRelevantDocuments(searchTokens, rootIndexNode);
 		// ------- end ---------
 		
 		// ----- Compute TF-IDF score for query -----
