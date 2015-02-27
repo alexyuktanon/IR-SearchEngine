@@ -39,7 +39,7 @@ public class Search {
 	    // ------- end ---------
 		
 		// ----- Compute TF-IDF score for each document by a term given in a query -----
-		Map<String, Double> scoreTermDocument = computeTotalTermDocumentScore(relevantDocs, searchTokens, rootIndexNode);
+		Map<String, Double> totalScoreTermDocument = computeTotalTermDocumentScore(relevantDocs, searchTokens, rootIndexNode);
 	    // ------- end ---------
 	    
 		// ----- Compute Cosine Similarity -----
@@ -51,7 +51,7 @@ public class Search {
 	    // ----- Testing Part -----
 		System.out.println("Relevant Docs: " + relevantDocs);
 		System.out.println("Score of Query: " + scoreQuery);
-		System.out.println("Score of Term-Document: " + scoreTermDocument);
+		System.out.println("Total Score of each Term-Document: " + totalScoreTermDocument);
 		// ------- end ---------
 	}
 	
