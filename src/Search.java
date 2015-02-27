@@ -43,6 +43,7 @@ public class Search {
 	    // ------- end ---------
 	    
 		// ----- Compare and Process Result -----
+		List<Map.Entry<String, Double>> rankedScores = rankScore(AllCosineScores);
 	    // ------- end ---------
 		
 	    // ----- Testing Part -----
@@ -50,6 +51,7 @@ public class Search {
 		System.out.println("TF-IDF Score of each query: " + scoreQueries);
 		System.out.println("Total TF-IDF Score of query: " + computeTotalQueryScore(scoreQueries));
 		System.out.println("Cosine score for each document from every query: " + AllCosineScores);
+		System.out.println("Ranked score: " + rankedScores);
 		// ------- end ---------
 	}
 	
@@ -134,4 +136,17 @@ public class Search {
 		return cosineScores;
 	}
 
+	private static List<Map.Entry<String, Double>> rankScore(Map<String, Double> scoreMap) { 
+	    // Sort map in increasing order
+	    List<Map.Entry<String, Double>> scoreList = new LinkedList<Map.Entry<String, Double> >(scoreMap.entrySet());
+		Collections.sort(scoreList, new Comparator<Map.Entry<String, Double>>() {
+			public int compare(Map.Entry<String, Double> o1,
+                                           Map.Entry<String, Double> o2) {
+				return (o1.getValue()).compareTo(o2.getValue()); // -> descending order
+			}
+		});
+	    
+	    return scoreList;
+	}
+	
 }
