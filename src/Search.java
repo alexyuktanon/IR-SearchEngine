@@ -134,11 +134,7 @@ public class Search {
 					}
 				}
 			}
-			
-			System.out.println(sumQD + " # " + sumQ2 + " # " + sumD2);
-			
 			Double queriesDocumentCosineScore = sumQD / ( Math.sqrt(sumQ2) * Math.sqrt(sumD2) );
-			System.out.println(queriesDocumentCosineScore);
 			
 			cosineScores.put(doc, queriesDocumentCosineScore);
 		}
