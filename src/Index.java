@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.collections4.MultiMap;
 import org.apache.commons.collections4.map.MultiValueMap;
@@ -99,6 +100,28 @@ public class Index {
 			ow = ow.withDefaultPrettyPrinter();
 		}
 		return ow.writeValueAsString(index);
+	}
+	
+	public static Index fromJson(String json, Set<String> targetWords) throws JsonParseException, JsonMappingException, IOException {
+		Map<String, IndexComponents> outIndex = new HashMap<String, IndexComponents>();
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> mapObject = mapper.readValue(json,
+				new TypeReference<Map<String, Object>>() {
+				});
+		for(String key : mapObject.keySet()) {
+			if(!targetWords.contains(key)) continue;
+			Map<String, Object> val = (HashMap<String, Object>) mapObject.get(key);
+			Double idf = (Double) val.get("idf");
+			Map<String, Double> tfidf = (Map<String, Double>) val.get("tfidfTuples");
+			Map<String, List<Integer>> positions = (Map<String, List<Integer>>) val.get("positionTuples");
+			MultiValueMap<String, Integer> pos = new MultiValueMap<String, Integer>();
+			for(Entry<String, List<Integer>> entry : positions.entrySet()) {
+				pos.putAll(entry.getKey(), entry.getValue());
+			}
+			IndexComponents comp = new IndexComponents(idf, tfidf, pos);
+			outIndex.put(key, comp);
+		}
+		return new Index(outIndex);
 	}
 	
 	public static Index fromJson(String json) throws JsonParseException, JsonMappingException, IOException {
