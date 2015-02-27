@@ -65,7 +65,6 @@ public class Search {
 	}
 	
 	public static Map<String, Double> computeQueryScore(List<String> tokens, JsonNode rootNode){
-		Double scoreQuery = 0.0;
 	    int numTokens = tokens.size();
 	    Map<String, Integer> tokensFrequencies = new HashMap<String, Integer>();
 	    for(int i = 0; i < numTokens; i++) {
@@ -97,6 +96,7 @@ public class Search {
 				scoreQueries.put(entry.getKey().toString(), tfidfValue);
 			}
 	    }
+	    
 		return scoreQueries;
 	}
 	
@@ -105,6 +105,7 @@ public class Search {
 		for(Map.Entry<String, Double> entry : scoreQueries.entrySet()){
 			totalScoreQuery = totalScoreQuery + entry.getValue();
 		}
+		
 		return totalScoreQuery;
 	}
 	
@@ -133,6 +134,7 @@ public class Search {
 			Double queriesDocumentCosineScore = sumQD / ( Math.sqrt(sumQ2) * Math.sqrt(sumD2) );
 			cosineScores.put(doc, queriesDocumentCosineScore);
 		}
+		
 		return cosineScores;
 	}
 
@@ -145,7 +147,7 @@ public class Search {
 				return (o1.getValue()).compareTo(o2.getValue()); // -> descending order
 			}
 		});
-	    
+		
 	    return scoreList;
 	}
 	
