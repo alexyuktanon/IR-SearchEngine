@@ -10,7 +10,7 @@ public class Search {
 
 	public static void main (String [] args){
 		// ----- Set up query for search -----
-		String searchQuery = "ant fish";
+		String searchQuery = "";
 		List<String> searchTokens = Token.tokenizeText(searchQuery);
 		// ------- end ---------
 		
@@ -38,11 +38,8 @@ public class Search {
 		Map<String, Double> scoreQueries = computeQueryScore(searchTokens, rootIndexNode);
 	    // ------- end ---------
 		
-		// ----- Compute TF-IDF score for each document by a term given in a query -----
-		Map<String, Double> totalScoreTermDocument = computeTotalTermDocumentScore(relevantDocs, searchTokens, rootIndexNode);
-	    // ------- end ---------
-	    
 		// ----- Compute Cosine Similarity -----
+		Map<String, Double> AllCosineScores = computeCosineScores(relevantDocs, searchTokens, rootIndexNode, scoreQueries);
 	    // ------- end ---------
 	    
 		// ----- Compare and Process Result -----
@@ -52,7 +49,7 @@ public class Search {
 		System.out.println("Relevant Docs: " + relevantDocs);
 		System.out.println("TF-IDF Score of each query: " + scoreQueries);
 		System.out.println("Total TF-IDF Score of query: " + computeTotalQueryScore(scoreQueries));
-		System.out.println("Total Score of each Term-Document: " + totalScoreTermDocument);
+		System.out.println("Cosine score for each document from every query: " + AllCosineScores);
 		// ------- end ---------
 	}
 	
@@ -109,9 +106,14 @@ public class Search {
 		return totalScoreQuery;
 	}
 	
-	public static Map<String, Double> computeTotalTermDocumentScore(Set<String> documents, List<String> tokens, JsonNode rootNode){
-		Map<String, Double> scoreTermDocument = new HashMap<String, Double>();
+	public static Map<String, Double> computeCosineScores(Set<String> documents, List<String> tokens,
+														  JsonNode rootNode, Map<String, Double> scoreQueries){
+		Map<String, Double> cosineScores = new HashMap<String, Double>();
 		for(String doc : documents){
+			Double sumQD = 0.0;
+			Double sumQ2 = 0.0;
+			Double sumD2 = 0.0;
+			
 			for(String token : tokens){
 				JsonNode wordNode = rootNode.path(token);
 				Iterator<Map.Entry<String,JsonNode>> ite = wordNode.path("tfidfTuples").getFields();
@@ -119,18 +121,28 @@ public class Search {
 					Entry<String,JsonNode> temp = ite.next();
 					// Check for relevant documents only
 					if(doc == temp.getKey().toString()){
-						if(scoreTermDocument.containsKey(doc)){
-							Double currentScore = (Double) scoreTermDocument.get(doc);
-							currentScore = currentScore + temp.getValue().asDouble();
-							scoreTermDocument.put(doc, currentScore);
-						}else{
-							//If there is no doc in the hashmap, add new
-							scoreTermDocument.put(doc, temp.getValue().asDouble());
-						}
+						// Compute cosine(query,doucment) score
+						Double q = scoreQueries.get(token);
+						Double d = temp.getValue().asDouble();
+						Double qd = q * d;
+						Double q2 = Math.pow(q,2);
+						Double d2 = Math.pow(d,2);
+						
+						sumQD = sumQD + qd;
+						sumQ2 = sumQ2 + q2;
+						sumD2 = sumD2 + d2;
 					}
 				}
 			}
+			
+			System.out.println(sumQD + " # " + sumQ2 + " # " + sumD2);
+			
+			Double queriesDocumentCosineScore = sumQD / ( Math.sqrt(sumQ2) * Math.sqrt(sumD2) );
+			System.out.println(queriesDocumentCosineScore);
+			
+			cosineScores.put(doc, queriesDocumentCosineScore);
 		}
-		return scoreTermDocument;
+		return cosineScores;
 	}
+
 }
