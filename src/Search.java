@@ -8,46 +8,35 @@ import org.codehaus.jackson.*;
 import org.codehaus.jackson.map.ObjectMapper;
 
 public class Search {
-
-	public static void main (String [] args){ 
-		// ----- Set up query for search -----
-		String searchQuery = "machine learning";
-		List<String> searchTokens = Token.tokenizeText(searchQuery);
-		// ------- end ---------
-		
-		// ----- Get relevant documents for search tokens -----
-		JsonNode rootIndexNode = null;
-		try {
-			rootIndexNode = getIndexes();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-//		Index index = Index.fromJson(json)
-//		Set<String> relevantDocs = getRelevantDocuments(searchTokens, rootIndexNode);
-//		// ------- end ---------
-//		
-//		// ----- Compute TF-IDF score for query -----
-//		Map<String, Double> scoreQueries = computeQueryScore(searchTokens, rootIndexNode);
-//	    // ------- end ---------
-//		
-//		// ----- Compute Cosine Similarity -----
-//		Map<String, Double> AllCosineScores = computeCosineScores(relevantDocs, searchTokens, rootIndexNode, scoreQueries);
-//	    // ------- end ---------
-//	    
-//		// ----- Compare and Process Result -----
-//		List<Map.Entry<String, Double>> rankedScores = rankScore(AllCosineScores);
-//	    // ------- end ---------
-//		
-//	    // ----- Testing Part -----
-//		System.out.println("Relevant Docs: " + relevantDocs);
-//		System.out.println("TF-IDF Score of each query: " + scoreQueries);
-//		System.out.println("Total TF-IDF Score of query: " + computeTotalQueryScore(scoreQueries));
-//		System.out.println("Cosine score for each document from every query: " + AllCosineScores);
-//		System.out.println("Ranked score: " + rankedScores);
-		// ------- end ---------
-	}
 	
-	public static JsonNode getIndexes() throws IOException{	
+	/**
+   * output a list of docId & search score pair in DESC order
+   * @param searchQuery
+   * @return
+   */
+  public static List<Entry<String, Double>> search(String searchQuery, Index index) {
+    List<String> searchTokens = Token.tokenizeText(searchQuery);
+    // ------- end ---------
+    
+    // ----- Get relevant documents for search tokens -----
+    
+    Set<String> relevantDocs = Search.getRelevantDocuments(searchTokens, index);
+    
+    // ------- end ---------
+    
+    // ----- Compute TF-IDF score for query -----
+    Map<String, Double> scoreQueries = Search.computeQueryScore(searchTokens, index);
+      // ------- end ---------
+    
+    // ----- Compute Cosine Similarity -----
+    Map<String, Double> AllCosineScores = Search.computeCosineScores(relevantDocs, searchTokens, index, scoreQueries);
+    
+
+    List<Map.Entry<String, Double>> rankedScores = Search.rankScore(AllCosineScores);
+    return rankedScores;
+  }
+	
+  private static JsonNode getIndexes() throws IOException{	
 		//Get indexes from JSON file
 		ObjectMapper mapper = new ObjectMapper();
 		File jsonFile = new File(Config.INDEX_PATH); 
@@ -56,13 +45,12 @@ public class Search {
 		return rootNode;
 	}
 	
-	public static Set<String> getRelevantDocuments(List<String> searchTokens, JsonNode rootIndexNode){
+	private static Set<String> getRelevantDocuments(List<String> searchTokens, Index index){
 		Set<String> relevantDocs = new HashSet<String>();
 		for(String token : searchTokens){
-			JsonNode wordNode = rootIndexNode.path(token);
-			Iterator<Map.Entry<String,JsonNode>> ite = wordNode.path("tfidfTuples").getFields();
+			Iterator<Map.Entry<String,Double>> ite = index.getTfidfMap(token).entrySet().iterator();
 			while (ite.hasNext()) {
-				Entry<String,JsonNode> temp = ite.next();
+				Entry<String,Double> temp = ite.next();
 				relevantDocs.add(temp.getKey());
 			}
 		}
@@ -70,7 +58,7 @@ public class Search {
 		return relevantDocs;
 	}
 	
-	public static Map<String, Double> computeQueryScore(List<String> tokens, Index index){
+	private static Map<String, Double> computeQueryScore(List<String> tokens, Index index){
 	    int numTokens = tokens.size();
 	    Map<String, Integer> tokensFrequencies = new HashMap<String, Integer>();
 	    for(int i = 0; i < numTokens; i++) {
@@ -106,7 +94,7 @@ public class Search {
 		return scoreQueries;
 	}
 	
-	public static Double computeTotalQueryScore(Map<String, Double> scoreQueries){
+	private static Double computeTotalQueryScore(Map<String, Double> scoreQueries){
 		Double totalScoreQuery = 0.0;
 		for(Map.Entry<String, Double> entry : scoreQueries.entrySet()){
 			totalScoreQuery = totalScoreQuery + entry.getValue();
@@ -115,7 +103,7 @@ public class Search {
 		return totalScoreQuery;
 	}
 	
-	public static Map<String, Double> computeCosineScores(Set<String> documents, List<String> tokens,
+	private static Map<String, Double> computeCosineScores(Set<String> documents, List<String> tokens,
 														  Index index, Map<String, Double> scoreQueries){
 		Map<String, Double> cosineScores = new HashMap<String, Double>();
 		for(String doc : documents){
@@ -144,7 +132,7 @@ public class Search {
 		return cosineScores;
 	}
 
-	public static List<Map.Entry<String, Double>> rankScore(Map<String, Double> scoreMap) { 
+	private static List<Map.Entry<String, Double>> rankScore(Map<String, Double> scoreMap) { 
 	    // Sort map in increasing order
 	    List<Map.Entry<String, Double>> scoreList = new LinkedList<Map.Entry<String, Double> >(scoreMap.entrySet());
 		Collections.sort(scoreList, new Comparator<Map.Entry<String, Double>>() {
