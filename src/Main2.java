@@ -20,7 +20,7 @@ public class Main2 {
 		Snippet s = new Snippet();
 		
 		for(String q : queries) {
-			Index index = readIndex(Config.INDEX_PATH, new HashSet<String>(Token.tokenizeText(q)));
+			Index index = Index.fromJsonFile(Config.INDEX_PATH, new HashSet<String>(Token.tokenizeText(q)));
 			System.out.println("=================================");
 			System.out.println("Query: "+q+"\n");
 			List<Entry<String, Double>> docOut = search(q, index);
@@ -38,11 +38,6 @@ public class Main2 {
 			System.out.println("=================================");
 		}
 		
-	}
-
-	public static Index readIndex(String indexPath, Set<String> queryTokens) throws IOException {
-		String indexJson = new String(Files.readAllBytes(Paths.get(indexPath)), StandardCharsets.UTF_8);
-		return Index.fromJson(indexJson, queryTokens);
 	}
 	
 	public static Index readIndex(String indexPath) throws IOException {
