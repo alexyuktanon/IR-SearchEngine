@@ -35,7 +35,7 @@ public class Search {
 		// ------- end ---------
 		
 		// ----- Compute TF-IDF score for query -----
-		Double scoreQuery = computeQueryScore(searchTokens, rootIndexNode);
+		Map<String, Double> scoreQueries = computeQueryScore(searchTokens, rootIndexNode);
 	    // ------- end ---------
 		
 		// ----- Compute TF-IDF score for each document by a term given in a query -----
@@ -50,7 +50,8 @@ public class Search {
 		
 	    // ----- Testing Part -----
 		System.out.println("Relevant Docs: " + relevantDocs);
-		System.out.println("Score of Query: " + scoreQuery);
+		System.out.println("TF-IDF Score of each query: " + scoreQueries);
+		System.out.println("Total TF-IDF Score of query: " + computeTotalQueryScore(scoreQueries));
 		System.out.println("Total Score of each Term-Document: " + totalScoreTermDocument);
 		// ------- end ---------
 	}
@@ -64,7 +65,7 @@ public class Search {
 		return rootNode;
 	}
 	
-	public static Double computeQueryScore(List<String> tokens, JsonNode rootNode){
+	public static Map<String, Double> computeQueryScore(List<String> tokens, JsonNode rootNode){
 		Double scoreQuery = 0.0;
 	    int numTokens = tokens.size();
 	    Map<String, Integer> tokensFrequencies = new HashMap<String, Integer>();
@@ -80,16 +81,32 @@ public class Search {
 			}
 	    }
 	    
-	    // Compute TF-IDF
+	    // Compute TF-IDF for each query
+	    Map<String, Double> scoreQueries = new HashMap<String, Double>();
 	    for(Map.Entry<String, Integer> entry : tokensFrequencies.entrySet()){
 	        double tfValue = entry.getValue();
 	        double idfValue = rootNode.path(entry.getKey()).path("idf").getDoubleValue();
 	        double tfidfValue = tfValue * idfValue;
 	        tfidfValue = Math.round( tfidfValue * 10000.0 ) / 10000.0; //Round to 4 decimal
 
-	        scoreQuery = scoreQuery + tfidfValue;
+			if(scoreQueries.containsKey(entry.getKey())){
+				Double currentTfidfScore = (Double) scoreQueries.get(entry.getValue());
+				currentTfidfScore = currentTfidfScore + tfidfValue;
+				scoreQueries.put(entry.getKey().toString(), currentTfidfScore);
+			}else{
+				//If there is no token in the hashmap, add new
+				scoreQueries.put(entry.getKey().toString(), tfidfValue);
+			}
 	    }
-		return scoreQuery;
+		return scoreQueries;
+	}
+	
+	public static Double computeTotalQueryScore(Map<String, Double> scoreQueries){
+		Double totalScoreQuery = 0.0;
+		for(Map.Entry<String, Double> entry : scoreQueries.entrySet()){
+			totalScoreQuery = totalScoreQuery + entry.getValue();
+		}
+		return totalScoreQuery;
 	}
 	
 	public static Map<String, Double> computeTotalTermDocumentScore(Set<String> documents, List<String> tokens, JsonNode rootNode){
