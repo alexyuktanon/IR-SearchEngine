@@ -24,9 +24,13 @@ public class Main2 {
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 			System.out.print("Enter query: ");
 		    String q = br.readLine();
-			System.out.println("=================================");
-			System.out.println("Query: "+q+"\n");
+		    
+		    long startSearcTimeTime = System.nanoTime();
 			List<Entry<String, Double>> docOut = Search.search(q, index);
+		    long endSearchTime = System.nanoTime();
+		    long durationInSecond = (endSearchTime - startSearcTimeTime)/100000;
+		    
+		    System.out.println("Found "+docOut.size()+" results in "+durationInSecond+" milliseconds.");
 			for(int i=0; i<Math.min(docOut.size(), MAX_DISPLAY); i++) {
 					Entry<String, Double> entry = docOut.get(i);
 				String docId = entry.getKey();
@@ -38,7 +42,7 @@ public class Main2 {
 				System.out.println(url);
 				System.out.println(snippet+"\n");
 			}
-			System.out.println("=================================");
+			System.out.println();
 		}
 		
 	}
