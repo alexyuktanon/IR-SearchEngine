@@ -64,11 +64,11 @@ public class Index {
 	}
 	
 	public Double getIdf(String word) {
-		return index.get(word).getIdf();
+		return (index.get(word) == null) ? 0.0 : index.get(word).getIdf();
 	}
 	
 	public Map<String, Double> getTfidfMap(String word) {
-		return index.get(word).getTfidfTuples();
+		return (index.get(word) == null) ? new HashMap<String, Double>() : index.get(word).getTfidfTuples();
 	}
 	
 	public List<Integer> getPosition(String word, String docId) {
@@ -78,7 +78,7 @@ public class Index {
 		return (List<Integer>) positions;
 	}
 	public MultiMap<String, Integer> getPositionMap(String word) {
-		return index.get(word).getPositionTuples();
+		return (index.get(word) == null) ? new MultiValueMap<String, Integer>() : index.get(word).getPositionTuples();
 	}
 	
 	@Override
@@ -109,8 +109,7 @@ public class Index {
 	}
 	
 	/**
-	 * parse from input stream and only get the key/values that are in targetWords
-	 * it should be faster and use less memory than loading/parsing the big text
+	 * still slow ... SHOULDNT USE IT
 	 * @param jsonFileName
 	 * @param targetWords
 	 * @return
@@ -131,12 +130,18 @@ public class Index {
       System.out.println("Error: root should be object: quiting.");
       return null;
     }
+    
 
     while (jp.nextToken() != JsonToken.END_OBJECT) {
       String key = jp.getCurrentName();
       
       // skip key
       jp.nextToken();
+      
+      if(!targetWords.contains(key)) {
+    	  jp.skipChildren();
+    	  continue;
+      }
       
       // get index components for that word
       Map<String, Object> indexComponents = jp.readValueAs(new TypeReference<Map<String, Object>>() {});
@@ -156,13 +161,14 @@ public class Index {
 		return new Index(outIndex);
 	}
 	
-	public static Index fromJson(String json) throws JsonParseException, JsonMappingException, IOException {
+	public static Index fromJson(String json, Set<String> targetWords) throws JsonParseException, JsonMappingException, IOException {
 		Map<String, IndexComponents> outIndex = new HashMap<String, IndexComponents>();
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> mapObject = mapper.readValue(json,
 				new TypeReference<Map<String, Object>>() {
 				});
 		for(String key : mapObject.keySet()) {
+			if(!targetWords.contains(key)) continue;
 			Map<String, Object> val = (HashMap<String, Object>) mapObject.get(key);
 			Double idf = (Double) val.get("idf");
 			Map<String, Double> tfidf = (Map<String, Double>) val.get("tfidfTuples");
@@ -174,6 +180,36 @@ public class Index {
 			IndexComponents comp = new IndexComponents(idf, tfidf, pos);
 			outIndex.put(key, comp);
 		}
+		return new Index(outIndex);
+	}
+	
+	public static Index fromJson(String json) throws JsonParseException, JsonMappingException, IOException {
+		System.out.println("Reading index please wait");
+		Map<String, IndexComponents> outIndex = new HashMap<String, IndexComponents>();
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> mapObject = mapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+		
+		int progress = 0; // 0%
+		int progressMod = mapObject.keySet().size()/100;
+		
+		for(String key : mapObject.keySet()) {
+			
+			if(progress % progressMod == 0) System.out.print(".");
+			progress++;
+			Map<String, Object> val = (HashMap<String, Object>) mapObject.get(key);
+			Double idf = (Double) val.get("idf");
+			Map<String, Double> tfidf = (Map<String, Double>) val.get("tfidfTuples");
+			Map<String, List<Integer>> positions = (Map<String, List<Integer>>) val.get("positionTuples");
+			MultiValueMap<String, Integer> pos = new MultiValueMap<String, Integer>();
+			for(Entry<String, List<Integer>> entry : positions.entrySet()) {
+				pos.putAll(entry.getKey(), entry.getValue());
+			}
+			IndexComponents comp = new IndexComponents(idf, tfidf, pos);
+			outIndex.put(key, comp);
+		}
+		
+		System.out.println();
+		System.out.println("done reading index");
 		return new Index(outIndex);
 	}
 	
