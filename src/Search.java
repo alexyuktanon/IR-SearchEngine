@@ -14,29 +14,25 @@ public class Search {
    * @param searchQuery
    * @return
    */
-  public static List<Entry<String, Double>> search(String searchQuery, Index index) {
-    List<String> searchTokens = Token.tokenizeText(searchQuery);
-    // ------- end ---------
-    
-    // ----- Get relevant documents for search tokens -----
-    
-    Set<String> relevantDocs = Search.getRelevantDocuments(searchTokens, index);
-    
-    // ------- end ---------
-    
-    // ----- Compute TF-IDF score for query -----
-    Map<String, Double> scoreQueries = Search.computeQueryScore(searchTokens, index);
-      // ------- end ---------
-    
-    // ----- Compute Cosine Similarity -----
-    Map<String, Double> AllCosineScores = Search.computeCosineScores(relevantDocs, searchTokens, index, scoreQueries);
-    
-
-    List<Map.Entry<String, Double>> rankedScores = Search.rankScore(AllCosineScores);
-    return rankedScores;
-  }
+	public static List<Entry<String, Double>> search(String searchQuery, Index index) {
+		// ----- Set up token from query -----
+		List<String> searchTokens = Token.tokenizeText(searchQuery);
+	    
+	    // ----- Get relevant documents for search tokens -----
+	    Set<String> relevantDocs = Search.getRelevantDocuments(searchTokens, index);
+	    
+	    // ----- Compute TF-IDF score for query -----
+	    Map<String, Double> scoreQueries = Search.computeQueryScore(searchTokens, index);
+	    
+	    // ----- Compute Cosine Similarity -----
+	    Map<String, Double> AllCosineScores = Search.computeCosineScores(relevantDocs, searchTokens, index, scoreQueries);
 	
-  private static JsonNode getIndexes() throws IOException{	
+		// ----- Compare and Process Result -----
+	    List<Map.Entry<String, Double>> rankedScores = Search.rankScore(AllCosineScores);
+	    return rankedScores;
+	}
+	
+  	private static JsonNode getIndexes() throws IOException{	
 		//Get indexes from JSON file
 		ObjectMapper mapper = new ObjectMapper();
 		File jsonFile = new File(Config.INDEX_PATH); 
