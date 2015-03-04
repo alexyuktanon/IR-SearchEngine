@@ -122,7 +122,11 @@ public class Search {
 			}
 			
 			Double queriesDocumentCosineScore = sumQD / ( Math.sqrt(sumQ2) * Math.sqrt(sumD2) );
-			cosineScores.put(doc, queriesDocumentCosineScore);
+			
+			//Not include if NaN
+			if(!queriesDocumentCosineScore.isNaN()){
+				cosineScores.put(doc, queriesDocumentCosineScore);
+			}
 		}
 		
 		return cosineScores;
