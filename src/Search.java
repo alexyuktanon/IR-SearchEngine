@@ -134,7 +134,7 @@ public class Search {
 		return cosineScores;
 	}
 
-	private static List<Map.Entry<String, Double>> rankScore(Map<String, Double> scoreMap) { 
+	protected static List<Map.Entry<String, Double>> rankScore(Map<String, Double> scoreMap) { 
 	    // Sort map in increasing order
 	    List<Map.Entry<String, Double>> scoreList = new LinkedList<Map.Entry<String, Double> >(scoreMap.entrySet());
 		Collections.sort(scoreList, new Comparator<Map.Entry<String, Double>>() {
