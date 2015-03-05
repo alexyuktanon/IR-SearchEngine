@@ -72,7 +72,7 @@ public class Search {
 	    // Compute TF-IDF for each query
 	    Map<String, Double> scoreQueries = new HashMap<String, Double>();
 	    for(Map.Entry<String, Integer> entry : tokensFrequencies.entrySet()){
-	        double tfValue = entry.getValue();
+	    	double tfValue =  Math.log(1.0 + ( (double) entry.getValue() / (double) numTokens)) / Math.log(2);
 	        double idfValue = index.getIdf(entry.getKey());
 	        double tfidfValue = tfValue * idfValue;
 	        tfidfValue = Math.round( tfidfValue * 10000.0 ) / 10000.0; //Round to 4 decimal

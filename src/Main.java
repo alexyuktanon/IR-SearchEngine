@@ -92,9 +92,9 @@ public class Main {
 			    
 			    // ----- TFDIF processing starts ------
 			    for(Map.Entry<String, Integer> entry : tokensFrequencies.entrySet()){
-			        double tfValue = 1 + ( Math.log( entry.getValue() ) / Math.log(2) );
+			        double tfValue = 1.0 + ( Math.log( (double) entry.getValue() ) / Math.log(2) );
 			        double dfValue = documentsFrequencies.get(entry.getKey());
-			        double idfValue = Math.log( ( Math.abs( corpus ) / dfValue ) ) / Math.log(2);
+			        double idfValue = Math.log( ( Math.abs( (double) corpus ) / dfValue ) ) / Math.log(2);
 			        double tfidfValue = tfValue * idfValue;
 			        idfValue = Math.round( idfValue * 10000.0 ) / 10000.0; //Round to 4 decimal
 			        tfidfValue = Math.round( tfidfValue * 10000.0 ) / 10000.0; //Round to 4 decimal
