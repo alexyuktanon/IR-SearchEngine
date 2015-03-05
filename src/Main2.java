@@ -65,7 +65,7 @@ public class Main2 {
 
 				String url = docIdMap.get(docId);
 				String snippet = s.getSnippet(doc, docId, q, index);
-				System.out.println("Rank "+i+" : doc id : "+docId+" score : "+entry.getValue());
+				System.out.println("Rank " + i + " | Doc ID: " + docId + " | Cosine Score: "+entry.getValue());
 				System.out.println(url);
 				System.out.println(snippet+"\n");
 			}
