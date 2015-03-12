@@ -1,41 +1,73 @@
 import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import com.sun.xml.internal.ws.util.StringUtils;
 
 
 public class Main2 {
 	
-	static final int MAX_DISPLAY = 20;
+	static final int MAX_DISPLAY = 5;
 	
-	public static int getTitlePageScore(String titleString, List<String> query) throws IOException {
-		int num = 0;
-		for(String q : query) {
-			if(titleString.toLowerCase().contains(q.toLowerCase())) num++;
-		}
-		return num;
+	// using jaccard scoring - perhaps should use tfidf
+	public static double getScore(String string, List<String> query) throws IOException {
+	  query.add("home"); // giving home page more score
+		if(string == null) return 0;	
+		Set<String> tokenString = new HashSet<String>(Token.tokenizeText(string));
+		Set<String> queryToken = new HashSet<String>(query);
+		
+		Set<String> union = new HashSet<String>(tokenString);
+		union.addAll(queryToken);
+		
+		Set<String> intersection = new HashSet<String>(tokenString);
+		intersection.retainAll(queryToken);
+		
+		return ((double) intersection.size())/((double) queryToken.size());
 	}
 	
-	public static List<Entry<String, Double>> updateScore(List<Entry<String, Double>> input, Map<String, String> docIdMap, Map<String, String> titleMap, List<String> query) throws Exception {
+	public static double computeScoreFromUrl(String url, List<String> query) {
+    double penalizeScore = url.indexOf("?"); // penalize query url
+    int numSlashes = url.length() - url.replace("/", "").length();
+    double score = (penalizeScore != -1) ? -1 : 0;
+    
+    if(numSlashes<=4) score += 1;
+    else if(numSlashes==5) score += 0.3;
+    else if(numSlashes==6) score += 0.1;
+    
+    return score;
+	}
+	
+	/**
+	 * update score using heuristics
+	 * for now, extract score from title and url
+	 * @param input
+	 * @param urlMap
+	 * @param titleMap
+	 * @param query
+	 * @return
+	 * @throws Exception
+	 */
+	public static List<Entry<String, Double>> updateScore(List<Entry<String, Double>> input, Map<String, String> urlMap, Map<String, String> titleMap, List<String> query, Index index) throws Exception {
 		Map<String, Double> scoreMap = new HashMap<String, Double>();
 		for(int i=0; i<input.size(); i++) {
 			Entry<String, Double> entry = input.get(i);
 			String docId = entry.getKey();
-			int score = getTitlePageScore(titleMap.get(docId), query);
-			scoreMap.put(docId, entry.getValue()+score);
+			
+			// TODO: apply linear combination or other heuristics
+			double titleScore = getScore(titleMap.get(docId), query);
+			double urlScore = getScore(urlMap.get(docId), query)+computeScoreFromUrl(urlMap.get(docId), query)*10;
+			
+			// pure heuristics here...
+			scoreMap.put(docId, entry.getValue()+urlScore*10+titleScore*100*10);
 		}
 		return Search.rankScore(scoreMap);
 	}
@@ -53,7 +85,7 @@ public class Main2 {
 		    
 		    long startSearcTimeTime = System.nanoTime();
 			List<Entry<String, Double>> docOut = Search.search(q, index);
-			docOut = updateScore(docOut, docIdMap, titleMap, Token.tokenizeText(q));
+			docOut = updateScore(docOut, docIdMap, titleMap, Token.tokenizeText(q), index);
 		    long endSearchTime = System.nanoTime();
 		    long durationInSecond = (endSearchTime - startSearcTimeTime)/100000;
 		    
