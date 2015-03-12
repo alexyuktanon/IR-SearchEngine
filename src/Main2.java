@@ -41,7 +41,7 @@ public class Main2 {
 	public static double computeScoreFromUrl(String url, List<String> query) {
     double penalizeScore = url.indexOf("?"); // penalize query url
     int numSlashes = url.length() - url.replace("/", "").length();
-    double score = (penalizeScore != -1) ? -1 : 0;
+    double score = (penalizeScore != -1) ? -100 : 0;
     
     if(numSlashes<=4) score += 1;
     else if(numSlashes==5) score += 0.3;
@@ -107,11 +107,9 @@ public class Main2 {
 					String url = docIdMap.get(docId);
 					String snippet = s.getSnippet(doc, docId, q, index);
 					resultData += "<div>";
-					resultData += "<a href=\"" + url + "\" target=\"_blank\">";
-					resultData += "<p>" + "Rank " + i + " | Doc ID: " + docId + " | Cosine Score: "+entry.getValue() + "</p>";
-					resultData += "<p>" + url + "</p>";
+					resultData += "<p>" + "Rank " + i + " | Doc ID: " + docId + " | Score: " + String.format("%.2f", entry.getValue()) + "</p>";
+					resultData += "<p><a href=\"" + url + "\" target=\"_blank\">" + url + "</a></p>";
 					resultData += "<p>" + snippet + "</p>";
-					resultData += "</a>";
 					resultData += "</div>";
 					resultData += "<br/>";
 				}
