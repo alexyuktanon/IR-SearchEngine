@@ -1,6 +1,10 @@
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -78,6 +82,63 @@ public class Main2 {
 		Index index = readIndex(Config.INDEX_PATH);
 		Snippet s = new Snippet();
 		
+		//Web UI
+		while(true) {		  
+			String status = new String(Files.readAllBytes(Paths.get("./web/share/status-q.txt")));
+			if(status.matches("1")){
+				//Change query status
+				PrintWriter out = new PrintWriter("./web/share/status-q.txt");
+				out.print("0");
+				out.close();
+				
+				//Read query
+			    String q = new String(Files.readAllBytes(Paths.get("./web/share/query.txt")));
+			    System.out.println("Processing " + q);
+			    
+			    //Process query
+				List<Entry<String, Double>> docOut = Search.search(q, index);
+				docOut = updateScore(docOut, docIdMap, titleMap, Token.tokenizeText(q), index);
+				String resultData = "<h1>Search for " + q + "</h1>";
+				for(int i=0; i<Math.min(docOut.size(), MAX_DISPLAY); i++) {
+					Entry<String, Double> entry = docOut.get(i);
+					String docId = entry.getKey();
+					String doc = new String(Files.readAllBytes(Paths.get(Config.ROOT_FOLDER+docId)), StandardCharsets.UTF_8);
+		
+					String url = docIdMap.get(docId);
+					String snippet = s.getSnippet(doc, docId, q, index);
+					resultData += "<div>";
+					resultData += "<a href=\"" + url + "\" target=\"_blank\">";
+					resultData += "<p>" + "Rank " + i + " | Doc ID: " + docId + " | Cosine Score: "+entry.getValue() + "</p>";
+					resultData += "<p>" + url + "</p>";
+					resultData += "<p>" + snippet + "</p>";
+					resultData += "</a>";
+					resultData += "</div>";
+					resultData += "<br/>";
+				}
+				
+				if(docOut.size() == 0){
+					resultData += "<div>";
+					resultData += "There are no results for your search!";
+					resultData += "</div>";
+				}
+	
+				//Print search result
+				out = new PrintWriter("./web/share/result.txt");
+				out.print(resultData);
+				out.close();
+			    
+				//Change result status
+				out = new PrintWriter("./web/share/status-r.txt");
+				out.print("1");
+				out.close();
+			}else{
+				System.out.println("Idle");
+				Thread.sleep(2000); //Delay retrieve query if status code = 0
+			}
+		}
+
+		//Console UI
+		/*
 		while(true) {
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 			System.out.print("Enter query: ");
@@ -103,7 +164,7 @@ public class Main2 {
 			}
 			System.out.println();
 		}
-		
+		*/
 	}
 	
 	public static Index readIndex(String indexPath, Set<String> q) throws IOException {
