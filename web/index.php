@@ -1,5 +1,5 @@
 <?php
-$query = isset($_POST['query']) ? $_POST['query'] : '';
+$query = isset($_GET['query']) ? $_GET['query'] : '';
 if(empty($query)){
 }else{
   //Write query file
@@ -64,8 +64,8 @@ if(empty($query)){
     <div class="row">
       <div class="col-md-6 col-md-offset-3">
         <center>
-          <form method="post" action="index.php">
-            <input type="text" name="query" class="form-control input-lg" placeholder="Search..." size="60" style="margin-bottom:10px;">
+          <form method="get" action="index.php">
+            <input type="text" name="query" class="form-control input-lg" placeholder="Search..." size="60" style="margin-bottom:10px;" value="<?php if(!empty($search_result)){ echo $query; } ?>">
             <input type="submit" class="btn btn-primary" value="Search">
           </form>
         </center>
