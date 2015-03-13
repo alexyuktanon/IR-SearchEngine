@@ -61,7 +61,7 @@ public class Main2 {
 	 * @return
 	 * @throws Exception
 	 */
-	double COSIM_THRESHOLD = 0.2;
+	static double COSIM_THRESHOLD = 0.2;
 	public static List<Entry<String, Double>> updateScore(List<Entry<String, Double>> input, Map<String, String> urlMap, Map<String, String> titleMap, List<String> query, Index index) throws Exception {
 		Map<String, Double> scoreMap = new HashMap<String, Double>();
 		for(int i=0; i<input.size(); i++) {
