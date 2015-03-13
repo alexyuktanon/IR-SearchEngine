@@ -41,11 +41,12 @@ public class Main2 {
 	public static double computeScoreFromUrl(String url, List<String> query) {
     double penalizeScore = url.indexOf("?"); // penalize query url
     int numSlashes = url.length() - url.replace("/", "").length();
-    double score = (penalizeScore != -1) ? -100 : 0;
+    double score = (penalizeScore != -1) ? -0.5 : 0;
     
-    if(numSlashes<=4) score += 1;
-    else if(numSlashes==5) score += 0.3;
-    else if(numSlashes==6) score += 0.1;
+    if(numSlashes<=3) score += 1;
+    else if(numSlashes==4) score += 0.5;
+    else if(numSlashes==5) score += 0.4;
+    else if(numSlashes==6) score += 0.35;
     
     return score;
 	}
@@ -68,10 +69,17 @@ public class Main2 {
 			
 			// TODO: apply linear combination or other heuristics
 			double titleScore = getScore(titleMap.get(docId), query);
-			double urlScore = getScore(urlMap.get(docId), query)+computeScoreFromUrl(urlMap.get(docId), query)*10;
+			double urlQueryScore = getScore(urlMap.get(docId), query);
+			double urlStructureScore = computeScoreFromUrl(urlMap.get(docId), query);
+			double cosimScore = entry.getValue();
 			
 			// pure heuristics here...
-			scoreMap.put(docId, entry.getValue()+urlScore*10+titleScore*100*10);
+			// 1) title is the most important one
+			// 2) url structure (num of slashes and query request) and cosim are equally important i think
+			// 3) url-query is prolly not much
+			// the way to design linear combination weight (since every score has a max value of 1):
+			// 1) > 2) >>> 3)
+			scoreMap.put(docId, titleScore*.4 + cosimScore*.2 + urlStructureScore*.3 + urlQueryScore*0);
 		}
 		return Search.rankScore(scoreMap);
 	}
@@ -97,13 +105,16 @@ public class Main2 {
 			    
 			    //Process query
 				List<Entry<String, Double>> docOut = Search.search(q, index);
+				System.out.println("Done getting cosim score. Start updating score");
 				docOut = updateScore(docOut, docIdMap, titleMap, Token.tokenizeText(q), index);
+        System.out.println("Done updating score");
 				String resultData = "<h1>Search for " + q + "</h1>";
 				for(int i=0; i<Math.min(docOut.size(), MAX_DISPLAY); i++) {
 					Entry<String, Double> entry = docOut.get(i);
 					String docId = entry.getKey();
 					String doc = new String(Files.readAllBytes(Paths.get(Config.ROOT_FOLDER+docId)), StandardCharsets.UTF_8);
 		
+					String title = titleMap.get(docId);
 					String url = docIdMap.get(docId);
 					String snippet = s.getSnippet(doc, docId, q, index);
 					resultData += "<div>";
