@@ -107,8 +107,8 @@ public class Main2 {
 				List<Entry<String, Double>> docOut = Search.search(q, index);
 				System.out.println("Done getting cosim score. Start updating score");
 				docOut = updateScore(docOut, docIdMap, titleMap, Token.tokenizeText(q), index);
-        System.out.println("Done updating score");
-				String resultData = "<h1>Search for " + q + "</h1>";
+				System.out.println("Done updating score");
+				String resultData = "<h4>Search for " + q + "</h4>";
 				for(int i=0; i<Math.min(docOut.size(), MAX_DISPLAY); i++) {
 					Entry<String, Double> entry = docOut.get(i);
 					String docId = entry.getKey();
@@ -118,8 +118,9 @@ public class Main2 {
 					String url = docIdMap.get(docId);
 					String snippet = s.getSnippet(doc, docId, q, index);
 					resultData += "<div>";
-					resultData += "<p>" + "Rank " + i + " | Doc ID: " + docId + " | Score: " + String.format("%.2f", entry.getValue()) + "</p>";
-					resultData += "<p><a href=\"" + url + "\" target=\"_blank\">" + url + "</a></p>";
+//					resultData += "<p>" + "Rank " + i + " | Doc ID: " + docId + " | Score: " + String.format("%.2f", entry.getValue()) + "</p>";
+					resultData += "<h4><a href=\"" + url + "\" target=\"_blank\">" + title + "</a></h4>";
+					resultData += "<p>" + url + "</p>";
 					resultData += "<p>" + snippet + "</p>";
 					resultData += "</div>";
 					resultData += "<br/>";

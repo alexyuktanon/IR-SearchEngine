@@ -2,6 +2,11 @@
 $query = isset($_GET['query']) ? $_GET['query'] : '';
 if(empty($query)){
 }else{
+  //Change result status
+  $file = fopen("share/status-r.txt", "w") or die("Unable to open file!");
+  fwrite($file, "0"); //0 = Old result, 1 = New result
+  fclose($file);
+
   //Write query file
   $file = fopen("share/query.txt", "w") or die("Unable to open file!");
   fwrite($file, $query);
@@ -19,11 +24,6 @@ if(empty($query)){
     fclose($file);
 
     if($status_r == "1"){
-      //Change result status
-      $file = fopen("share/status-r.txt", "w") or die("Unable to open file!");
-      fwrite($file, "0"); //0 = Old result, 1 = New result
-      fclose($file);
-
       $file = fopen("share/result.txt", "r") or die("Unable to open file!");
       $search_result = fread($file, filesize("share/result.txt"));
       fclose($file);
