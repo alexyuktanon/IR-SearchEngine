@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,7 +25,6 @@ public class Main2 {
 	
 	// using jaccard scoring - perhaps should use tfidf
 	public static double getScore(String string, List<String> query) throws IOException {
-	  query.add("home"); // giving home page more score
 		if(string == null) return 0;	
 		Set<String> tokenString = new HashSet<String>(Token.tokenizeText(string));
 		Set<String> queryToken = new HashSet<String>(query);
@@ -61,6 +61,7 @@ public class Main2 {
 	 * @return
 	 * @throws Exception
 	 */
+	double COSIM_THRESHOLD = 0.2;
 	public static List<Entry<String, Double>> updateScore(List<Entry<String, Double>> input, Map<String, String> urlMap, Map<String, String> titleMap, List<String> query, Index index) throws Exception {
 		Map<String, Double> scoreMap = new HashMap<String, Double>();
 		for(int i=0; i<input.size(); i++) {
@@ -68,18 +69,20 @@ public class Main2 {
 			String docId = entry.getKey();
 			
 			// TODO: apply linear combination or other heuristics
-			double titleScore = getScore(titleMap.get(docId), query);
+
+      double cosimScore = entry.getValue();
+      if(cosimScore < 0.2) continue; // reduce workload
+			double titleScore = getScore(titleMap.get(docId), query)+0.1*getScore(titleMap.get(docId), new ArrayList<String>(){{add("home");}});
 			double urlQueryScore = getScore(urlMap.get(docId), query);
 			double urlStructureScore = computeScoreFromUrl(urlMap.get(docId), query);
-			double cosimScore = entry.getValue();
 			
 			// pure heuristics here...
 			// 1) title is the most important one
 			// 2) url structure (num of slashes and query request) and cosim are equally important i think
-			// 3) url-query is prolly not much
+			// 3) url-query is prolly not much - for tie breaking
 			// the way to design linear combination weight (since every score has a max value of 1):
 			// 1) > 2) >>> 3)
-			scoreMap.put(docId, titleScore*.4 + cosimScore*.2 + urlStructureScore*.3 + urlQueryScore*0);
+			scoreMap.put(docId, titleScore*.4 + cosimScore*.2 + urlStructureScore*.3 + urlQueryScore*0.001);
 		}
 		return Search.rankScore(scoreMap);
 	}
