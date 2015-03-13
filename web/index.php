@@ -65,7 +65,7 @@ if(empty($query)){
       <div class="col-md-6 col-md-offset-3">
         <center>
           <form method="post" action="index.php">
-            <input type="text" name="query" class="form-control" placeholder="Search..." size="60" style="margin-bottom:10px;">
+            <input type="text" name="query" class="form-control input-lg" placeholder="Search..." size="60" style="margin-bottom:10px;">
             <input type="submit" class="btn btn-primary" value="Search">
           </form>
         </center>
