@@ -71,7 +71,7 @@ public class Main2 {
 			// TODO: apply linear combination or other heuristics
 
       double cosimScore = entry.getValue();
-      if(cosimScore < 0.2) continue; // reduce workload
+      if(cosimScore < COSIM_THRESHOLD) continue; // reduce workload
 			double titleScore = getScore(titleMap.get(docId), query)+0.1*getScore(titleMap.get(docId), new ArrayList<String>(){{add("home");}});
 			double urlQueryScore = getScore(urlMap.get(docId), query);
 			double urlStructureScore = computeScoreFromUrl(urlMap.get(docId), query);
