@@ -146,7 +146,7 @@ public class Main2 {
 				out.close();
 			}else{
 				System.out.println("Idle");
-				Thread.sleep(2000); //Delay retrieve query if status code = 0
+				Thread.sleep(1000); //Delay retrieve query if status code = 0
 			}
 		}
 
