@@ -111,7 +111,7 @@ public class Main2 {
 				System.out.println("Done getting cosim score. Start updating score");
 				docOut = updateScore(docOut, docIdMap, titleMap, Token.tokenizeText(q), index);
 				System.out.println("Done updating score");
-				String resultData = "<h4>Search for " + q + "</h4>";
+				String resultData = "<h4>Search for " + q + "</h4><br/>";
 				for(int i=0; i<Math.min(docOut.size(), MAX_DISPLAY); i++) {
 					Entry<String, Double> entry = docOut.get(i);
 					String docId = entry.getKey();
