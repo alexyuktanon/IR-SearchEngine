@@ -107,11 +107,14 @@ public class Main2 {
 			    System.out.println("Processing " + q);
 			    
 			    //Process query
+			    long startSearchTime = System.nanoTime();
 				List<Entry<String, Double>> docOut = Search.search(q, index);
 				System.out.println("Done getting cosim score. Start updating score");
 				docOut = updateScore(docOut, docIdMap, titleMap, Token.tokenizeText(q), index);
+			    long endSearchTime = System.nanoTime();
+			    double durationInSecond = ((double) endSearchTime - (double) startSearchTime) / 1000000000.0;
 				System.out.println("Done updating score");
-				String resultData = "<h4>Search for " + q + "</h4><br/>";
+				String resultData = "<h4>Search for " + q + "</h4><span>("+ durationInSecond +" seconds)</span><br/>";
 				for(int i=0; i<Math.min(docOut.size(), MAX_DISPLAY); i++) {
 					Entry<String, Double> entry = docOut.get(i);
 					String docId = entry.getKey();
@@ -157,11 +160,11 @@ public class Main2 {
 			System.out.print("Enter query: ");
 		    String q = br.readLine();
 		    
-		    long startSearcTimeTime = System.nanoTime();
+		    long startSearchTime = System.nanoTime();
 			List<Entry<String, Double>> docOut = Search.search(q, index);
 			docOut = updateScore(docOut, docIdMap, titleMap, Token.tokenizeText(q), index);
 		    long endSearchTime = System.nanoTime();
-		    long durationInSecond = (endSearchTime - startSearcTimeTime)/100000;
+		    double durationInSecond = ((double) endSearchTime - (double) startSearchTime) / 1000000000.0;
 		    
 		    System.out.println("Found "+docOut.size()+" results in "+durationInSecond+" milliseconds.");
 			for(int i=0; i<Math.min(docOut.size(), MAX_DISPLAY); i++) {
