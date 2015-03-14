@@ -123,7 +123,7 @@ public class Main2 {
 					resultData += "<div>";
 //					resultData += "<p>" + "Rank " + i + " | Doc ID: " + docId + " | Score: " + String.format("%.2f", entry.getValue()) + "</p>";
 					resultData += "<h4><a href=\"" + url + "\" target=\"_blank\">" + title + "</a></h4>";
-					resultData += "<p>" + url + "</p>";
+					resultData += "<p>" + url + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href=\"http://web.archive.org/web/*/" + url + "\" target=\"_blank\">Cache</a>" + "</p>";
 					resultData += "<p>" + snippet + "</p>";
 					resultData += "</div>";
 					resultData += "<br/>";
