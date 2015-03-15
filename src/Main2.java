@@ -114,7 +114,7 @@ public class Main2 {
 			    long endSearchTime = System.nanoTime();
 			    double durationInSecond = ((double) endSearchTime - (double) startSearchTime) / 1000000000.0;
 				System.out.println("Done updating score");
-				String resultData = "<h4>Search for " + q + "</h4><span>("+ durationInSecond +" seconds)</span><br/>";
+				String resultData = "<h4>Search for " + q + " <small>| about " + docOut.size() +" results ("+ durationInSecond +" seconds)</small></h4><br/>";
 				for(int i=0; i<Math.min(docOut.size(), MAX_DISPLAY); i++) {
 					Entry<String, Double> entry = docOut.get(i);
 					String docId = entry.getKey();
@@ -134,7 +134,7 @@ public class Main2 {
 				
 				if(docOut.size() == 0){
 					resultData += "<div>";
-					resultData += "There are no results for your search!";
+					resultData += "<strong>There are no results for your search! Please try with other keywords.</strong>";
 					resultData += "</div>";
 				}
 	
